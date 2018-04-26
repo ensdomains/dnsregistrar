@@ -19,5 +19,5 @@ contract ENS {
     event NewResolver(bytes32 indexed node, address resolver);
 
     // Logged when the TTL of a node changes
-    event NewTTL(bytes32 indexed node, uint64 ttl);
+    event NewTTL(bytes32 indexed node, uint64 _ttl);
 }
