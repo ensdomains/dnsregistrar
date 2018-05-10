@@ -1,6 +1,7 @@
 var exports = module.exports = {};
 
 const TYPE_TXT = exports.TYPE_TXT = 16;
+const TYPE_NSEC = exports.TYPE_NSEC = 47;
 const TYPE_DNSKEY = exports.TYPE_DNSKEY = 48;
 const TYPE_DS = exports.TYPE_DS = 43;
 const CLASS_INET = exports.CLASS_INET = 1;
@@ -46,6 +47,57 @@ var encodeTXT = exports.encodeTXT = function(buf, off, rec) {
   return off;
 }
 
+var encodeNSEC = exports.encodeNSEC = function(buf, off, rec) {
+  rec.type = TYPE_NSEC;
+  off = encodeRRHeader(buf, off, rec); 
+  var lengthPointer = off;
+  off += 2;
+  off = encodeName(buf, off, rec.next);
+  off += encodeTypeBitMap(buf, off, rec.rrtypes);
+  var rd_length = off - lengthPointer - 2;
+  buf.writeUInt16BE(rd_length, lengthPointer);
+  return off;
+}
+
+// https://tools.ietf.org/html/rfc4034#section-4.1.2
+var encodeTypeBitMap = exports.encodeTypeBitMap = function(buffer, off, types){
+  let result = getTypeBitMap(types);
+  result.copy(buffer, off);
+  return result.length;
+}
+
+var getTypeBitMap = function(types){
+  var window_size = 256;
+  var byte_size = 8;
+  var bitmap = {};
+  var bitmap_length = 32;
+  types.forEach(function(type){
+    var window_number = parseInt(type / window_size);
+    var window_type = type % window_size;
+    var byte_position = parseInt(window_type / byte_size) + 1;
+    if(!bitmap[window_number]){
+      bitmap[window_number] = {
+        buffer:new Buffer(bitmap_length),
+        watermark: 1,
+        window_number: window_number
+      }
+    }
+    if(bitmap[window_number].watermark < byte_position){
+      bitmap[window_number].watermark = byte_position;
+    }
+    set_bit(bitmap[window_number].buffer, window_type);
+  })
+  var array = Object.entries(bitmap).map(([key, w])=>{
+    var numbers = Buffer.from([w.window_number, w.watermark]);
+    return Buffer.concat([numbers, w.buffer.slice(0,w.watermark) ]);
+  });
+  return Buffer.concat(array);
+}
+
+var set_bit = function(bitmap, offset){
+  return bitmap[parseInt(offset / 8)] |= 256 >> (offset % 8) + 1
+}
+
 var encodeDNSKEY = exports.encodeDNSKEY = function(buf, off, rec) {
   rec.type = TYPE_DNSKEY;
   off = encodeRRHeader(buf, off, rec);
@@ -72,6 +124,20 @@ const RR_TYPES = {}
 RR_TYPES[TYPE_TXT] = encodeTXT;
 RR_TYPES[TYPE_DS] = encodeDS;
 RR_TYPES[TYPE_DNSKEY] = encodeDNSKEY;
+RR_TYPES[TYPE_NSEC] = encodeNSEC;
+
+var encodeRRs = exports.encodeRRs = function(buf, off, rrs) {
+  for(var rr of rrs) {
+    off = RR_TYPES[rr.type](buf, off, rr);
+  }
+  return off;
+}
+
+var hexEncodeRRs = exports.hexEncodeRRs = function(rrs) {
+  var buf = new Buffer(4096);
+  var off = encodeRRs(buf, 0, rrs);
+  return "0x" + buf.toString("hex", 0, off);
+}
 
 var encodeSignedSet = exports.encodeSignedSet = function(buf, off, rec) {
   buf.writeUInt16BE(rec.typeCovered, off); off += 2;
@@ -82,10 +148,7 @@ var encodeSignedSet = exports.encodeSignedSet = function(buf, off, rec) {
   buf.writeUInt32BE(rec.inception, off); off += 4;
   buf.writeUInt16BE(rec.keytag, off); off += 2;
   off = encodeName(buf, off, rec.signerName);
-  for(var rr of rec.rrs) {
-    var off2 = RR_TYPES[rr.type](buf, off, rr);
-    off = off2;
-  }
+  off = encodeRRs(buf, off, rec.rrs);
   return off;
 }
 
