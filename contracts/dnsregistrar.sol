@@ -27,17 +27,17 @@ contract DNSRegistrar {
     bytes public rootDomain;
     bytes32 public rootNode;
 
-    function DNSRegistrar(DNSSEC _dnssec, ENS _ens, bytes _rootDomain, bytes32 _rootNode) public {
+    constructor(DNSSEC _dnssec, ENS _ens, bytes _rootDomain, bytes32 _rootNode) public {
         oracle = _dnssec;
         ens = _ens;
         rootDomain = _rootDomain;
         rootNode = _rootNode;
     }
 
-    function claim(bytes name) public {
+    function claim(bytes name, bytes proof) public {
         bytes32 labelHash = getLabelHash(name);
 
-        address addr = getOwnerAddress(name);
+        address addr = getOwnerAddress(name, proof);
         // Anyone can set the address to 0, but only the owner can claim a name.
         require(addr == 0 || addr == msg.sender);
 
@@ -51,20 +51,21 @@ contract DNSRegistrar {
         return name.keccak(1, len);
     }
 
-    function getOwnerAddress(bytes memory name) internal view returns(address) {
+    function getOwnerAddress(bytes memory name, bytes memory proof) internal view returns(address) {
         // Add "_ens." to the front of the name.
         Buffer.buffer memory buf;
         buf.init(name.length + 5);
         buf.append("\x04_ens");
         buf.append(name);
 
-        // Query the oracle for TXT records
-        var (, inserted, rrs) = oracle.rrset(CLASS_INET, TYPE_TXT, buf.buf);
+        // Check the provided TXT record has been validated by the oracle
+        var (, inserted, hash) = oracle.rrdata(TYPE_TXT, buf.buf);
+        require(hash == bytes20(keccak256(proof)));
 
-        for(RRUtils.RRIterator memory iter = rrs.iterateRRs(0); !iter.done(); iter.next()) {
+        for(RRUtils.RRIterator memory iter = proof.iterateRRs(0); !iter.done(); iter.next()) {
             require(inserted + iter.ttl >= now, "DNS record is stale; refresh or delete it before proceeding.");
 
-            address addr = parseRR(rrs, iter.rdataOffset);
+            address addr = parseRR(proof, iter.rdataOffset);
             if(addr != 0) {
                 return addr;
             }

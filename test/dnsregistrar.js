@@ -23,15 +23,16 @@ contract('DNSRegistrar', function(accounts) {
     assert.equal(await registrar.rootNode(), namehash.hash("test"));
 
     var now = Math.round(new Date().getTime() / 1000);
-    var tx = await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), now, now, dns.hexEncodeTXT({
+    var proof = dns.hexEncodeTXT({
       name: "_ens.foo.test.",
       klass: 1,
       ttl: 3600,
       text: ["a=" + accounts[0]]
-    }));
+    });
+    var tx = await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), now, now, proof);
     assert.equal(parseInt(tx.receipt.status), 1);
 
-    tx = await registrar.claim(dns.hexEncodeName("foo.test."));
+    tx = await registrar.claim(dns.hexEncodeName("foo.test."), proof);
     assert.equal(parseInt(tx.receipt.status), 1);
 
     assert.equal(await ens.owner(namehash.hash("foo.test")), accounts[0]);
@@ -42,7 +43,7 @@ contract('DNSRegistrar', function(accounts) {
     var tx = await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), now, now, "");
     assert.equal(parseInt(tx.receipt.status), 1);
 
-    tx = await registrar.claim(dns.hexEncodeName("foo.test."));
+    tx = await registrar.claim(dns.hexEncodeName("foo.test."), "");
     assert.equal(parseInt(tx.receipt.status), 1);
 
     assert.equal(await ens.owner(namehash.hash("foo.test")), 0);
@@ -50,17 +51,18 @@ contract('DNSRegistrar', function(accounts) {
 
   it('does not allow anyone but the owner to claim the name', async function() {
     var now = Math.round(new Date().getTime() / 1000);
-    var tx = await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), now, now, dns.hexEncodeTXT({
+    var proof = dns.hexEncodeTXT({
       name: "_ens.foo.test.",
       klass: 1,
       ttl: 3600,
       text: ["a=0x0123456789012345678901234567890123456789"]
-    }));
+    });
+    var tx = await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), now, now, proof);
     assert.equal(parseInt(tx.receipt.status), 1);
 
     tx = undefined;
     try {
-      tx = await registrar.claim(dns.hexEncodeName("foo.test."));
+      tx = await registrar.claim(dns.hexEncodeName("foo.test."), proof);
     } catch(error) {
       // Assert ganache revert exception
       assert.equal(error.message, 'VM Exception while processing transaction: revert');
@@ -74,17 +76,18 @@ contract('DNSRegistrar', function(accounts) {
   });
 
   it('does not allow updates with stale records', async function() {
-    var tx = await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), 0, 0, dns.hexEncodeTXT({
+    var proof = dns.hexEncodeTXT({
       name: "_ens.bar.test.",
       klass: 1,
       ttl: 3600,
       text: ["a=" + accounts[0]]
-    }));
+    });
+    var tx = await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), 0, 0, proof);
     assert.equal(parseInt(tx.receipt.status), 1);
 
     tx = undefined;
     try {
-      tx = await registrar.claim(dns.hexEncodeName("bar.test."));
+      tx = await registrar.claim(dns.hexEncodeName("bar.test."), proof);
     } catch(error) {
       // Assert ganache revert exception
       assert.equal(error.message, 'VM Exception while processing transaction: revert');

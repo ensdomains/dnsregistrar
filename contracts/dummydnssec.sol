@@ -5,20 +5,19 @@ contract DummyDNSSEC {
     bytes expectedName;
     uint32 inception;
     uint64 inserted;
-    bytes rrs;
+    bytes20 hash;
 
-    function setData(uint16 _expectedType, bytes _expectedName, uint32 _inception, uint64 _inserted, bytes _rrs) public {
+    function setData(uint16 _expectedType, bytes _expectedName, uint32 _inception, uint64 _inserted, bytes _proof) public {
       expectedType = _expectedType;
       expectedName = _expectedName;
       inception = _inception;
       inserted = _inserted;
-      rrs = _rrs;
+      hash = bytes20(keccak256(_proof));
     }
 
-    function rrset(uint16 class, uint16 dnstype, bytes name) public constant returns(uint32, uint64, bytes) {
-        require(class == 1);
+    function rrdata(uint16 dnstype, bytes name) public constant returns(uint32, uint64, bytes20) {
         require(dnstype == expectedType);
         require(keccak256(name) == keccak256(expectedName));
-        return (inception, inserted, rrs);
+        return (inception, inserted, hash);
     }
 }
