@@ -1,4 +1,6 @@
 {
+  "name": "@ensdomains/dnsregistrar",
+  "version": "0.0.1",
   "requires": true,
   "lockfileVersion": 1,
   "dependencies": {
@@ -21,6 +23,9 @@
       "resolved": "https://registry.npmjs.org/punycode/-/punycode-2.1.0.tgz",
       "version": "2.1.0"
     }
+  },
+  "scripts": {
+    "prepublishOnly": "truffle networks --clean && truffle compile"
   },
   "devDependencies": {
     "eth-gas-reporter": "^0.1.2"
