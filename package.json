@@ -1,5 +1,5 @@
 {
-  "name": "@ensdomains/dnsregistrar",
+  "name": "dnsregistrar",
   "version": "0.0.1",
   "requires": true,
   "lockfileVersion": 1,
