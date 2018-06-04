@@ -1,10 +1,10 @@
 pragma solidity ^0.4.23;
 
 import "./ens.sol";
-import "dnssec-oracle/contracts/Buffer.sol";
-import "dnssec-oracle/contracts/DNSSEC.sol";
-import "dnssec-oracle/contracts/BytesUtils.sol";
-import "dnssec-oracle/contracts/RRUtils.sol";
+import "@ensdomains/dnssec-oracle/contracts/Buffer.sol";
+import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
+import "@ensdomains/dnssec-oracle/contracts/BytesUtils.sol";
+import "@ensdomains/dnssec-oracle/contracts/RRUtils.sol";
 
 /**
  * @dev An ENS registrar that allows the owner of a DNS name to claim the
