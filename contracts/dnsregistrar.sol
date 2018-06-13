@@ -15,10 +15,6 @@ contract DNSRegistrar {
     using RRUtils for *;
     using Buffer for Buffer.buffer;
 
-    event Log(string message, bytes value);
-    event Log(string message, bytes32 value);
-    event Log(string message, address value);
-
     uint16 constant CLASS_INET = 1;
     uint16 constant TYPE_TXT = 16;
 
@@ -26,6 +22,8 @@ contract DNSRegistrar {
     ENS public ens;
     bytes public rootDomain;
     bytes32 public rootNode;
+
+    event Claim(bytes32 indexed node, address indexed owner, bytes dnsname);
 
     constructor(DNSSEC _dnssec, ENS _ens, bytes _rootDomain, bytes32 _rootNode) public {
         oracle = _dnssec;
@@ -38,10 +36,9 @@ contract DNSRegistrar {
         bytes32 labelHash = getLabelHash(name);
 
         address addr = getOwnerAddress(name, proof);
-        // Anyone can set the address to 0, but only the owner can claim a name.
-        require(addr == 0 || addr == msg.sender);
 
         ens.setSubnodeOwner(rootNode, labelHash, addr);
+        emit Claim(keccak256(rootNode, labelHash), addr, name);
     }
 
     function getLabelHash(bytes memory name) internal view returns(bytes32) {

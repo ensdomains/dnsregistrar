@@ -49,7 +49,7 @@ contract('DNSRegistrar', function(accounts) {
     assert.equal(await ens.owner(namehash.hash("foo.test")), 0);
   });
 
-  it('does not allow anyone but the owner to claim the name', async function() {
+  it('allows anyone to update a DNSSEC referenced name', async function() {
     var now = Math.round(new Date().getTime() / 1000);
     var proof = dns.hexEncodeTXT({
       name: "_ens.foo.test.",
@@ -60,19 +60,9 @@ contract('DNSRegistrar', function(accounts) {
     var tx = await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), now, now, proof);
     assert.equal(parseInt(tx.receipt.status), 1);
 
-    tx = undefined;
-    try {
-      tx = await registrar.claim(dns.hexEncodeName("foo.test."), proof);
-    } catch(error) {
-      // Assert ganache revert exception
-      assert.equal(error.message, 'VM Exception while processing transaction: revert');
-    }
-    // Assert geth failed transaction
-    if(tx !== undefined) {
-      assert.equal(parseInt(tx.receipt.status), 0);
-    }
-
-    assert.equal(await ens.owner(namehash.hash("foo.test")), 0);
+    tx = await registrar.claim(dns.hexEncodeName("foo.test."), proof);
+    assert.equal(parseInt(tx.receipt.status), 1);
+    assert.equal(await ens.owner(namehash.hash("foo.test")), "0x0123456789012345678901234567890123456789");
   });
 
   it('does not allow updates with stale records', async function() {
