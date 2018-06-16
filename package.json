@@ -5,6 +5,7 @@
   "lockfileVersion": 1,
   "dependencies": {
     "eth-ens-namehash": "^2.0.8",
+    "@ensdomains/dnssec-oracle": "^0.0.1",
     "idna-uts46": {
       "integrity": "sha1-vgmLK3wcq/vvh6i4D2JvrDc2auo=",
       "requires": {
