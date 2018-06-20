@@ -4,8 +4,9 @@
   "requires": true,
   "lockfileVersion": 1,
   "dependencies": {
-    "eth-ens-namehash": "^2.0.8",
     "@ensdomains/dnssec-oracle": "^0.0.1",
+    "dnsprovejs": "github:makoto/dnsprove-js#dnsprove",
+    "eth-ens-namehash": "^2.0.8",
     "idna-uts46": {
       "integrity": "sha1-vgmLK3wcq/vvh6i4D2JvrDc2auo=",
       "requires": {
@@ -23,12 +24,14 @@
       "integrity": "sha1-X4Y+3Im5bbCQdLrXlHvwkFbKTn0=",
       "resolved": "https://registry.npmjs.org/punycode/-/punycode-2.1.0.tgz",
       "version": "2.1.0"
-    }
+    },
+    "web3": "^1.0.0-beta.34"
   },
   "scripts": {
     "prepublishOnly": "truffle networks --clean && truffle compile"
   },
   "devDependencies": {
-    "eth-gas-reporter": "^0.1.2"
+    "eth-gas-reporter": "^0.1.2",
+    "sinon": "^6.0.0"
   }
 }

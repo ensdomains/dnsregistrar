@@ -1,19 +1,25 @@
 var ENSImplementation = artifacts.require("./ENSImplementation.sol");
 var DummyDNSSEC = artifacts.require("./DummyDNSSEC.sol");
-var DNSRegistrar = artifacts.require("./DNSRegistrar.sol");
-
+var DNSRegistrarContract = artifacts.require("./DNSRegistrar.sol");
 var namehash = require('eth-ens-namehash');
 var dns = require("../lib/dns.js");
+var sha3 = require('js-sha3').keccak_256;
+var DnsProve = require('dnsprovejs');
+var sinon = require('sinon');
+var DNSRegistrar = require('../lib/dnsregistrar');
 
 contract('DNSRegistrar', function(accounts) {
   var registrar = null;
   var ens = null;
   var dnssec = null;
+  var tld = 'test';
+  var now = Math.round(new Date().getTime() / 1000);
 
-  before(async function() {
-    registrar = await DNSRegistrar.deployed();
-    ens = await ENSImplementation.deployed();
-    dnssec = await DummyDNSSEC.deployed();
+  beforeEach(async function() {
+    ens = await ENSImplementation.new();
+    dnssec = await DummyDNSSEC.new();
+    registrar = await DNSRegistrarContract.new(dnssec.address, ens.address, dns.hexEncodeName(tld + "."), namehash.hash(tld));
+    await ens.setSubnodeOwner(0, '0x' + sha3(tld), registrar.address);
   });
 
   it('allows the owner of a DNS name to claim it in ENS', async function() {
@@ -22,7 +28,6 @@ contract('DNSRegistrar', function(accounts) {
     assert.equal(await registrar.rootDomain(), dns.hexEncodeName("test."));
     assert.equal(await registrar.rootNode(), namehash.hash("test"));
 
-    var now = Math.round(new Date().getTime() / 1000);
     var proof = dns.hexEncodeTXT({
       name: "_ens.foo.test.",
       klass: 1,
@@ -39,7 +44,6 @@ contract('DNSRegistrar', function(accounts) {
   });
 
   it('allows anyone to zero out an obsolete name', async function() {
-    var now = Math.round(new Date().getTime() / 1000);
     var tx = await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), now, now, "");
     assert.equal(parseInt(tx.receipt.status), 1);
 
@@ -50,7 +54,6 @@ contract('DNSRegistrar', function(accounts) {
   });
 
   it('allows anyone to update a DNSSEC referenced name', async function() {
-    var now = Math.round(new Date().getTime() / 1000);
     var proof = dns.hexEncodeTXT({
       name: "_ens.foo.test.",
       klass: 1,
@@ -89,4 +92,42 @@ contract('DNSRegistrar', function(accounts) {
 
     assert.equal(await ens.owner(namehash.hash("bar.test")), 0);
   });
+
+  describe('dnsregistrarjs.claim', async function(){
+    var dnsProofs, provider, dnsprover, owner, nonOwner, proof, dnsregistrarjs;
+    before(async function(){
+      dnsProofs = 6;
+      provider = web3.currentProvider;
+      dnsprover = new DnsProve(provider);
+      owner = accounts[1];
+      nonOwner = accounts[2];
+      proof = dns.hexEncodeTXT({
+        name: "_ens.foo.test.",
+        klass: 1,
+        ttl: 3600,
+        text: [`a=${owner}`]
+      });
+    })
+
+    it('looks up DNS record, submit proof to DNSSEC, and claim the name', async function() {
+      sinon.stub(dnsprover, 'prove')
+        .withArgs('_ens.foo.test', dnssec.address)
+        .resolves({
+          unproven:dnsProofs,
+          lastProof: proof,
+          owner: owner,
+          submit: async () =>{
+            await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), now, now, proof);
+          }
+        })
+      dnsregistrarjs = new DNSRegistrar(provider, dnssec.address, registrar.address)
+      // Stubbing actual dnsprover;
+      dnsregistrarjs.dnsprover = dnsprover;
+
+      var claim = await dnsregistrarjs.claim('foo.test');
+      assert.equal(claim.numTransaction, dnsProofs + 1);
+      await claim.submit({from:nonOwner});
+      assert.equal(await ens.owner(namehash.hash("foo.test")), owner);
+    });
+  })
 });
