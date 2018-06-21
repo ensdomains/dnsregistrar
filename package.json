@@ -28,7 +28,7 @@
     "web3": "^1.0.0-beta.34"
   },
   "scripts": {
-    "prepublishOnly": "truffle networks --clean && truffle compile"
+    "prepublishOnly": "truffle compile && truffle networks --clean"
   },
   "devDependencies": {
     "eth-gas-reporter": "^0.1.2",
