@@ -12,7 +12,11 @@ contract DummyDNSSEC {
       expectedName = _expectedName;
       inception = _inception;
       inserted = _inserted;
-      hash = bytes20(keccak256(_proof));
+      if(_proof.length == 0) {
+          hash = bytes20(0);
+      } else {
+          hash = bytes20(keccak256(_proof));
+      }
     }
 
     function rrdata(uint16 dnstype, bytes name) public constant returns(uint32, uint64, bytes20) {
