@@ -1,12 +1,12 @@
 {
-  "name": "dnsregistrar",
+  "name": "@ensdomains/dnsregistrar",
   "main": "lib/dnsregistrar.js",
-  "version": "0.0.5",
+  "version": "0.0.3",
   "requires": true,
   "lockfileVersion": 1,
   "dependencies": {
     "@ensdomains/dnssec-oracle": "^0.0.1",
-    "dnsprovejs": "0.0.3",
+    "@ensdomains/dnsprovejs": "0.0.1",
     "eth-ens-namehash": "^2.0.8",
     "idna-uts46": {
       "integrity": "sha1-vgmLK3wcq/vvh6i4D2JvrDc2auo=",
