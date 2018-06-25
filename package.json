@@ -5,7 +5,7 @@
   "requires": true,
   "lockfileVersion": 1,
   "dependencies": {
-    "@ensdomains/dnssec-oracle": "^0.0.1",
+    "@ensdomains/dnssec-oracle": "^0.0.5",
     "@ensdomains/dnsprovejs": "0.0.1",
     "eth-ens-namehash": "^2.0.8",
     "idna-uts46": {

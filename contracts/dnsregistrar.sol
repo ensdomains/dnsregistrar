@@ -32,6 +32,15 @@ contract DNSRegistrar {
         rootNode = _rootNode;
     }
 
+    /**
+     * @dev Claims a name by proving ownership of its DNS equivalent.
+     * @param name The name to claim, in DNS wire format.
+     * @param proof A DNS RRSet proving ownership of the name. Must be verified
+     *        in the DNSSEC oracle before calling. This RRSET must contain a TXT
+     *        record for '_ens.' + name, with the value 'a=0x...'. Ownership of
+     *        the name will be transferred to the address specified in the TXT
+     *        record.
+     */
     function claim(bytes name, bytes proof) public {
         bytes32 labelHash = getLabelHash(name);
 
@@ -39,6 +48,18 @@ contract DNSRegistrar {
 
         ens.setSubnodeOwner(rootNode, labelHash, addr);
         emit Claim(keccak256(rootNode, labelHash), addr, name);
+    }
+
+    /**
+     * @dev Submits proofs to the DNSSEC oracle, then claims a name using those proofs.
+     * @param name The name to claim, in DNS wire format.
+     * @param input The data to be passed to the Oracle's `submitProofs` function. The last
+     *        proof must be the TXT record required by the registrar.
+     * @param proof The proof record for the first element in input.
+     */
+    function proveAndClaim(bytes name, bytes input, bytes proof) public {
+        proof = oracle.submitRRSets(input, proof);
+        claim(name, proof);
     }
 
     function getLabelHash(bytes memory name) internal view returns(bytes32) {
@@ -57,6 +78,8 @@ contract DNSRegistrar {
 
         // Check the provided TXT record has been validated by the oracle
         var (, inserted, hash) = oracle.rrdata(TYPE_TXT, buf.buf);
+        if(hash == bytes20(0) && proof.length == 0) return 0;
+
         require(hash == bytes20(keccak256(proof)));
 
         for(RRUtils.RRIterator memory iter = proof.iterateRRs(0); !iter.done(); iter.next()) {
