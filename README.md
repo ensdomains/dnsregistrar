@@ -22,23 +22,11 @@ import('@ensdomains/dnsregistrar/contracts/dnsregistar.sol')
 In addition to `DNSRegistrar` Truffle based artifact which you can call the smart contract directly, we provide a javascript wrapper which looks up DNS record, extract a proof, submit the proof via DNSSec Oracle, and register to ENS via DNSRegistrar using the proof
 
 ```js
-var Web3 = require('web3');
-var web3 = new Web3('http://localhost:8545')
-var DNSRegistrarJs = require('dnsregistrar');
-var dnsregistraraddress = '0xff28974ffcf7f60cabd157b57ed9801d88c0ed57'
-var dnssecaddress = '0x3b72a60d66d8d01e4a44072324969c0d7dc1e754';
-var claim;
-var account = '0x6c60eed1d4b146d52c07130d171b55e4c54b9742'
-dnsregistrar = new DNSRegistrarJs(web3.currentProvider, dnssecaddress, dnsregistraraddress);
-dnsregistrar.claim('matoken.xyz').then((c)=>{claim = c})
-claim.submit({from:account})
-```
-```js
 var DNSRegistrarJs = require('@ensdomains/dnsregistrar');
 dnsregistrar = new DNSRegistrarJs(provider, dnssecaddress, dnsregistraraddress);
 dnsregistrar.claim('foo.test').then((claim)=>{
     claim.numTransaction // shows number of transactions it has to send
-    claim.submit();
+    claim.submit({from:account});
 })
 ```
 
