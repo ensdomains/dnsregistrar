@@ -109,7 +109,7 @@ contract('DNSRegistrar', function(accounts) {
       });
     })
 
-    it('looks up DNS record, submit proof to DNSSEC, and claim the name', async function() {
+    it('looks up DNS record, submits the proof to DNSSEC, and claims the name', async function() {
       sinon.stub(dnsprover, 'prove')
         .withArgs('_ens.foo.test', dnssec.address)
         .resolves({
