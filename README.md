@@ -14,7 +14,7 @@ npm install '@ensdomains/dnsregistrar' --save
 ## Including DNSRegistrar within smart contract
 
 ```
-import('@ensdomains/dnsregistrar/contracts/dnsregistar.sol')
+import '@ensdomains/dnsregistrar/contracts/dnsregistar.sol'
 ```
 
 ### Using js binding
