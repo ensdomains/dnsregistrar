@@ -12,6 +12,7 @@ contract('DNSRegistrar', function(accounts) {
   var registrar = null;
   var ens = null;
   var dnssec = null;
+  var dnssecAddress = null;
   var tld = 'test';
   var now = Math.round(new Date().getTime() / 1000);
 
@@ -19,6 +20,7 @@ contract('DNSRegistrar', function(accounts) {
     ens = await ENSImplementation.new();
     dnssec = await DummyDNSSEC.new();
     registrar = await DNSRegistrarContract.new(dnssec.address, ens.address, dns.hexEncodeName(tld + "."), namehash.hash(tld));
+    dnssecAddress = registrar.oracle.call();
     await ens.setSubnodeOwner(0, '0x' + sha3(tld), registrar.address);
   });
 
@@ -120,7 +122,7 @@ contract('DNSRegistrar', function(accounts) {
             await dnssec.setData(16, dns.hexEncodeName("_ens.foo.test."), now, now, proof);
           }
         })
-      dnsregistrarjs = new DNSRegistrar(provider, dnssec.address, registrar.address)
+      dnsregistrarjs = new DNSRegistrar(provider, registrar.address)
       // Stubbing actual dnsprover;
       dnsregistrarjs.dnsprover = dnsprover;
 

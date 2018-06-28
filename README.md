@@ -23,7 +23,7 @@ In addition to `DNSRegistrar` Truffle based artifact which you can call the smar
 
 ```js
 var DNSRegistrarJs = require('@ensdomains/dnsregistrar');
-dnsregistrar = new DNSRegistrarJs(provider, dnssecaddress, dnsregistraraddress);
+dnsregistrar = new DNSRegistrarJs(provider, dnsregistraraddress);
 dnsregistrar.claim('foo.test').then((claim)=>{
     claim.numTransactions // shows number of transactions it has to send
     claim.submit({from:account});
