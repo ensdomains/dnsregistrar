@@ -4,7 +4,7 @@ var DNSRegistrarContract = artifacts.require("./DNSRegistrar.sol");
 var namehash = require('eth-ens-namehash');
 var dns = require("../lib/dns.js");
 var sha3 = require('js-sha3').keccak_256;
-var DnsProve = require('dnsprovejs');
+var DnsProve = require('@ensdomains/dnsprovejs');
 var sinon = require('sinon');
 var DNSRegistrar = require('../lib/dnsregistrar');
 
