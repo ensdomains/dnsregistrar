@@ -125,7 +125,7 @@ contract('DNSRegistrar', function(accounts) {
       dnsregistrarjs.dnsprover = dnsprover;
 
       var claim = await dnsregistrarjs.claim('foo.test');
-      assert.equal(claim.numTransaction, dnsProofs + 1);
+      assert.equal(claim.numTransactions, dnsProofs + 1);
       await claim.submit({from:nonOwner});
       assert.equal(await ens.owner(namehash.hash("foo.test")), owner);
     });
