@@ -4,6 +4,9 @@
   "version": "0.0.3",
   "requires": true,
   "lockfileVersion": 1,
+  "prettier": {
+    "singleQuote": true
+  },
   "dependencies": {
     "@ensdomains/dnssec-oracle": "^0.0.5",
     "@ensdomains/dnsprovejs": "0.0.1",
@@ -29,12 +32,14 @@
     "web3": "^1.0.0-beta.34"
   },
   "scripts": {
+    "lint": "prettier --write test/* ",
     "pretest": "truffle compile",
     "test": "truffle test",
     "prepublishOnly": "truffle compile && truffle networks --clean"
   },
   "devDependencies": {
     "eth-gas-reporter": "^0.1.2",
+    "prettier": "^1.13.7",
     "sinon": "^6.0.0",
     "truffle": "^4.1.12"
   }
