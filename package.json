@@ -8,8 +8,9 @@
     "singleQuote": true
   },
   "dependencies": {
-    "@ensdomains/dnssec-oracle": "^0.0.5",
     "@ensdomains/dnsprovejs": "0.0.1",
+    "@ensdomains/dnssec-oracle": "^0.0.5",
+    "@ensdomains/ens": "^0.1.1",
     "eth-ens-namehash": "^2.0.8",
     "idna-uts46": {
       "integrity": "sha1-vgmLK3wcq/vvh6i4D2JvrDc2auo=",
@@ -32,7 +33,7 @@
     "web3": "^1.0.0-beta.34"
   },
   "scripts": {
-    "lint": "prettier --write test/* ",
+    "lint": "solium --dir ./contracts",
     "pretest": "truffle compile",
     "test": "truffle test",
     "prepublishOnly": "truffle compile && truffle networks --clean"
@@ -41,6 +42,7 @@
     "eth-gas-reporter": "^0.1.2",
     "prettier": "^1.13.7",
     "sinon": "^6.0.0",
+    "solium": "^1.1.8",
     "truffle": "^4.1.12"
   }
 }
