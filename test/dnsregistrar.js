@@ -1,4 +1,4 @@
-var ENSImplementation = artifacts.require('./ENSImplementation.sol');
+var ENSRegistry = artifacts.require('./ENSRegistry.sol');
 var DummyDNSSEC = artifacts.require('./DummyDNSSEC.sol');
 var DNSRegistrarContract = artifacts.require('./DNSRegistrar.sol');
 var namehash = require('eth-ens-namehash');
@@ -17,7 +17,7 @@ contract('DNSRegistrar', function(accounts) {
   var now = Math.round(new Date().getTime() / 1000);
 
   beforeEach(async function() {
-    ens = await ENSImplementation.new();
+    ens = await ENSRegistry.new();
     dnssec = await DummyDNSSEC.new();
     registrar = await DNSRegistrarContract.new(
       dnssec.address,

@@ -1,5 +1,5 @@
 // Include ENSImplementation so that it gets compiled
-var ENSImplementation = artifacts.require("./ENSImplementation.sol");
+var ENSRegistry = artifacts.require("@ensdomains/ens/ENSRegistry.sol");
 var DNSRegistrar = artifacts.require("./DNSRegistrar.sol");
 
 var namehash = require('eth-ens-namehash');
