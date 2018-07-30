@@ -12,9 +12,7 @@ contract DummyDNSSEC {
       expectedName = _expectedName;
       inception = _inception;
       inserted = _inserted;
-      if(_proof.length == 0) {
-          hash = bytes20(0);
-      } else {
+      if(_proof.length != 0) {
           hash = bytes20(keccak256(_proof));
       }
     }
