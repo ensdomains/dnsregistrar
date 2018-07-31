@@ -148,13 +148,17 @@ contract('DNSRegistrar', function(accounts) {
 
     it('looks up DNS record, submits the proof to DNSSEC, and claims the name', async function() {
       sinon
-        .stub(dnsprover, 'prove')
-        .withArgs('_ens.foo.test', dnssec.address)
+        .stub(dnsprover, 'lookup')
+        .withArgs('TXT', '_ens.foo.test')
         .resolves({
-          unproven: dnsProofs,
-          lastProof: proof,
-          owner: owner,
-          submit: async () => {
+          lastProof:proof
+        });
+
+      sinon
+        .stub(dnsprover, 'getOracle')
+        // .withArgs(dnssec.address)
+        .resolves({
+          submitAll: async()=>{
             await dnssec.setData(
               16,
               dns.hexEncodeName('_ens.foo.test.'),
@@ -164,12 +168,12 @@ contract('DNSRegistrar', function(accounts) {
             );
           }
         });
+
       dnsregistrarjs = new DNSRegistrar(provider, registrar.address);
       // Stubbing actual dnsprover;
       dnsregistrarjs.dnsprover = dnsprover;
 
       var claim = await dnsregistrarjs.claim('foo.test');
-      assert.equal(claim.numTransactions, dnsProofs + 1);
       await claim.submit({ from: nonOwner });
       assert.equal(await ens.owner(namehash.hash('foo.test')), owner);
     });
