@@ -35,7 +35,7 @@
   "scripts": {
     "lint": "solium --dir ./contracts",
     "pretest": "truffle compile",
-    "test": "truffle migrate && truffle test",
+    "test": "truffle test",
     "prepublishOnly": "truffle compile && truffle networks --clean"
   },
   "devDependencies": {
