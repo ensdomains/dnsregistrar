@@ -36,9 +36,12 @@
     "lint": "solium --dir ./contracts",
     "pretest": "truffle compile",
     "test": "truffle test",
-    "prepublishOnly": "truffle compile && truffle networks --clean"
+    "compile": "babel-cli --presets env -d dist lib",
+    "prepublishOnly": "truffle compile && truffle networks --clean && npm run compile",
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "eth-gas-reporter": "^0.1.2",
     "prettier": "^1.13.7",
     "sinon": "^6.0.0",
