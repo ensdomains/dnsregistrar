@@ -37,7 +37,7 @@
     "pretest": "truffle compile",
     "test": "truffle test",
     "compile": "babel-cli --presets env -d dist lib",
-    "prepublishOnly": "truffle compile && truffle networks --clean && npm run compile",
+    "prepublishOnly": "truffle compile && truffle networks --clean && npm run compile"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
