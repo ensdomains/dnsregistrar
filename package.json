@@ -35,8 +35,8 @@
   "scripts": {
     "lint": "solium --dir ./contracts",
     "pretest": "truffle compile",
-    "test": "truffle test",
-    "compile": "babel-cli --presets env -d dist lib",
+    "test": "truffle migrate && truffle test",
+    "compile": "babel --presets env -d dist lib",
     "prepublishOnly": "truffle compile && truffle networks --clean && npm run compile"
   },
   "devDependencies": {
