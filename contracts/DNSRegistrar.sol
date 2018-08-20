@@ -1,7 +1,6 @@
 pragma solidity ^0.4.23;
 
 import "@ensdomains/ens/contracts/ENS.sol";
-import "@ensdomains/dnssec-oracle/contracts/Buffer.sol";
 import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
 import "@ensdomains/dnssec-oracle/contracts/BytesUtils.sol";
 import "@ensdomains/dnssec-oracle/contracts/RRUtils.sol";
@@ -75,9 +74,10 @@ contract DNSRegistrar {
         buf.init(name.length + 5);
         buf.append("\x04_ens");
         buf.append(name);
-
+        bytes20 hash;
+        uint64 inserted;
         // Check the provided TXT record has been validated by the oracle
-        var (, inserted, hash) = oracle.rrdata(TYPE_TXT, buf.buf);
+        (, inserted, hash) = oracle.rrdata(TYPE_TXT, buf.buf);
         if(hash == bytes20(0) && proof.length == 0) return 0;
 
         require(hash == bytes20(keccak256(proof)));
