@@ -1,7 +1,6 @@
 pragma solidity ^0.4.23;
 
 import "@ensdomains/ens/contracts/ENS.sol";
-import "@ensdomains/buffer/contracts/Buffer.sol";
 import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
 import "@ensdomains/dnssec-oracle/contracts/BytesUtils.sol";
 import "@ensdomains/dnssec-oracle/contracts/RRUtils.sol";

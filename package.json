@@ -8,7 +8,6 @@
     "singleQuote": true
   },
   "dependencies": {
-    "@ensdomains/buffer": "0.0.5",
     "@ensdomains/dnsprovejs": "0.0.2",
     "@ensdomains/dnssec-oracle": "^0.0.5",
     "@ensdomains/ens": "^0.1.1",
