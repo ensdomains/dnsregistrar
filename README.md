@@ -1,6 +1,6 @@
 # DNS registrar for ENS
 
-[![Build Status](https://travis-ci.org/ensdomains/dnsregistrar.svg?branch=master)](https://travis-ci.org/ensdomains/dnsregistrar)
+[![Build Status](https://travis-ci.org/ensdomains/dnsregistrar.svg?branch=master)](https://travis-ci.org/ensdomains/dnsregistrar) [![License](https://img.shields.io/badge/License-BSD--2--Clause-blue.svg)](LICENSE)
 
 This project implements a registrar for ENS that grants ENS domains to anyone who can prove ownership of the corresponding domain in DNS; it uses the [DNSSEC Oracle](https://github.com/Arachnid/dnssec-oracle) to prove this.
 
