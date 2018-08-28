@@ -1,14 +1,14 @@
 {
   "name": "@ensdomains/dnsregistrar",
   "main": "dist/dnsregistrar.js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "requires": true,
   "lockfileVersion": 1,
   "prettier": {
     "singleQuote": true
   },
   "dependencies": {
-    "@ensdomains/dnsprovejs": "0.0.2",
+    "@ensdomains/dnsprovejs": "0.0.4",
     "@ensdomains/dnssec-oracle": "^0.0.5",
     "@ensdomains/ens": "^0.1.1",
     "eth-ens-namehash": "^2.0.8",
