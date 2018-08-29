@@ -1,7 +1,6 @@
-// Include ENSImplementation so that it gets compiled
-var ENSRegistry = artifacts.require("@ensdomains/ens/ENSRegistry.sol");
-var DummyDNSSEC = artifacts.require("./DummyDNSSEC.sol");
-var DNSRegistrar = artifacts.require("./DNSRegistrar.sol");
+var ENSRegistry = artifacts.require("@ensdomains/ens/ENSRegistry");
+var DummyDNSSEC = artifacts.require("./DummyDNSSEC");
+var DNSRegistrar = artifacts.require("./DNSRegistrar");
 
 var namehash = require('eth-ens-namehash');
 var sha3 = require('js-sha3').keccak_256
