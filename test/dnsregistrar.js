@@ -1,6 +1,6 @@
 var ENSRegistry = artifacts.require('./ENSRegistry.sol');
 var DummyDNSSEC = artifacts.require('./DummyDNSSEC.sol');
-var DNSRegistrarContract = artifacts.require('./DNSRegistrar');
+var DNSRegistrarContract = artifacts.require('./DNSRegistrar.sol');
 var namehash = require('eth-ens-namehash');
 var dns = require('../lib/dns.js');
 var sha3 = require('js-sha3').keccak_256;
