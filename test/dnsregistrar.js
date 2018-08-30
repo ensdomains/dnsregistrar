@@ -21,11 +21,10 @@ contract('DNSRegistrar', function(accounts) {
     dnssec = await DummyDNSSEC.new();
     registrar = await DNSRegistrarContract.new(
       dnssec.address,
-      ens.address,
-      dns.hexEncodeName(tld + '.'),
-      namehash.hash(tld)
+      ens.address
     );
     dnssecAddress = registrar.oracle.call();
+    await registrar.addRootDomain(dns.hexEncodeName(tld + '.'), namehash.hash(tld));
     await ens.setSubnodeOwner(0, '0x' + sha3(tld), registrar.address);
   });
 
