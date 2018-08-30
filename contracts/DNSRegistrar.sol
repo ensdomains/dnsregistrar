@@ -37,12 +37,12 @@ contract DNSRegistrar {
      *        record.
      */
     function claim(bytes name, bytes proof) public {
-        bytes32 labelHash;
-        bytes32 rootNode;
-
         address addr = getOwnerAddress(name, proof);
 
+        bytes32 labelHash;
+        bytes32 rootNode;
         (labelHash, rootNode) = getLabels(name);
+        
         ens.setSubnodeOwner(rootNode, labelHash, addr);
         emit Claim(keccak256(abi.encodePacked(rootNode, labelHash)), addr, name);
     }
