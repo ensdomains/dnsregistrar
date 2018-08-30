@@ -62,8 +62,10 @@ contract DNSRegistrar {
     function getLabels(bytes memory name) internal view returns (bytes32, bytes32) {
         uint len = name.readUint8(0);
         uint second = name.readUint8(len + 1);
-        // Check this name is a direct subdomain of the one we're responsible for
-        return (name.keccak(1, len), name.keccak(1 + len, second));
+
+        require(name.readUint8(len + second + 2) == 0);
+
+        return (name.keccak(1, len), keccak256(bytes32(0), name.keccak(2 + len, second)));
     }
 
     function getOwnerAddress(bytes memory name, bytes memory proof) internal view returns(address) {
