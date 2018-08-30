@@ -21,7 +21,7 @@ contract DNSRegistrar is Owned {
     DNSSEC public oracle;
     ENS public ens;
 
-    mapping (bytes => bytes32) rootDomains;
+    mapping (bytes32 => bytes32) public rootDomains;
 
     event Claim(bytes32 indexed node, address indexed owner, bytes dnsname);
 
@@ -30,8 +30,8 @@ contract DNSRegistrar is Owned {
         ens = _ens;
     }
 
-    function addRootDomain(bytes rootDomain, bytes32 rootNode) owner_only {
-        rootDomain[rootDomain] = rootNode;
+    function addRootDomain(bytes32 rootDomain, bytes32 rootNode) owner_only {
+        rootDomains[rootDomain] = rootNode;
     }
 
     /**
@@ -44,15 +44,15 @@ contract DNSRegistrar is Owned {
      *        record.
      */
     function claim(bytes name, bytes proof) public {
-        bytes rootDomain = getRootDomain(name);
+        bytes32 domain = getRootDomain(name);
         bytes32 labelHash = getLabelHash(name);
 
         address addr = getOwnerAddress(name, proof);
 
-        bytes32 rootNode = rootDomains[rootDomain];
+        bytes32 rootNode = rootDomains[domain];
 
         ens.setSubnodeOwner(rootNode, labelHash, addr);
-        emit Claim(keccak256(rootNode, labelHash), addr, name);
+        emit Claim(keccak256(abi.encodePacked(rootNode, labelHash)), addr, name);
     }
 
     /**
@@ -67,11 +67,11 @@ contract DNSRegistrar is Owned {
         claim(name, proof);
     }
 
-    function getRootDomain(bytes memory name) internal view returns (bytes) {
+    function getRootDomain(bytes memory name) internal view returns (bytes32) {
         uint len = name.readUint8(0);
         uint rootLen = name.readUint8(len + 1);
 
-        bytes rootDomain = name.readBytesN(len + 1, rootLen + 1); // @todo, I feel this is accurate
+        bytes32 rootDomain = name.readBytesN(len + 1 + rootLen, rootLen + 1);
         require(rootDomains[rootDomain] != 0x0);
 
         return rootDomain;

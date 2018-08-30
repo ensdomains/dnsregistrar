@@ -31,8 +31,7 @@ contract('DNSRegistrar', function(accounts) {
   it('allows the owner of a DNS name to claim it in ENS', async function() {
     assert.equal(await registrar.oracle(), dnssec.address);
     assert.equal(await registrar.ens(), ens.address);
-    assert.equal(await registrar.rootDomain(), dns.hexEncodeName('test.'));
-    assert.equal(await registrar.rootNode(), namehash.hash('test'));
+    assert.equal(await registrar.rootDomains.call(dns.hexEncodeName('test.')), namehash.hash(tld));
 
     var proof = dns.hexEncodeTXT({
       name: '_ens.foo.test.',
