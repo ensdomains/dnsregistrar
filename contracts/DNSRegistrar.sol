@@ -37,11 +37,11 @@ contract DNSRegistrar {
      *        record.
      */
     function claim(bytes name, bytes proof) public {
-        bytes32 labelHash = getLabelHash(name);
+        bytes32 labelHash = getLabelHash(name, 0);
 
         address addr = getOwnerAddress(name, proof);
 
-        bytes32 rootNode = getRootNode(name);
+        bytes32 rootNode = getLabelHash(name, labelHash.length + 1);
         ens.setSubnodeOwner(rootNode, labelHash, addr);
         emit Claim(keccak256(abi.encodePacked(rootNode, labelHash)), addr, name);
     }
@@ -58,17 +58,10 @@ contract DNSRegistrar {
         claim(name, proof);
     }
 
-    function getRootNode(bytes memory name) internal view returns (bytes32) {
-        uint len = name.readUint8(0);
-        uint rootLen = name.readUint8(len + 1);
-
-        return name.keccak(len + 1 + 1, rootLen);
-    }
-
-    function getLabelHash(bytes memory name) internal view returns (bytes32) {
-        uint len = name.readUint8(0);
+    function getLabelHash(bytes memory name, uint offset) internal view returns (bytes32) {
+        uint len = name.readUint8(offset);
         // Check this name is a direct subdomain of the one we're responsible for
-        return name.keccak(1, len);
+        return name.keccak(offset + 1, len);
     }
 
     function getOwnerAddress(bytes memory name, bytes memory proof) internal view returns(address) {
