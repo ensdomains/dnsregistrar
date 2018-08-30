@@ -19,16 +19,14 @@ contract DNSRegistrar {
 
     DNSSEC public oracle;
     ENS public ens;
-    bytes public rootDomain;
-    bytes32 public rootNode;
+
+    mapping (bytes => bytes32) rootDomains;
 
     event Claim(bytes32 indexed node, address indexed owner, bytes dnsname);
 
-    constructor(DNSSEC _dnssec, ENS _ens, bytes _rootDomain, bytes32 _rootNode) public {
+    constructor(DNSSEC _dnssec, ENS _ens) public {
         oracle = _dnssec;
         ens = _ens;
-        rootDomain = _rootDomain;
-        rootNode = _rootNode;
     }
 
     /**
@@ -41,9 +39,12 @@ contract DNSRegistrar {
      *        record.
      */
     function claim(bytes name, bytes proof) public {
+        bytes rootDomain = getRootDomain(name);
         bytes32 labelHash = getLabelHash(name);
 
         address addr = getOwnerAddress(name, proof);
+
+        bytes32 rootNode = rootDomains[rootDomain];
 
         ens.setSubnodeOwner(rootNode, labelHash, addr);
         emit Claim(keccak256(rootNode, labelHash), addr, name);
@@ -61,10 +62,18 @@ contract DNSRegistrar {
         claim(name, proof);
     }
 
-    function getLabelHash(bytes memory name) internal view returns(bytes32) {
+    function getRootDomain(bytes memory name) internal view returns (bytes) {
+        uint len = name.readUint8(0);
+
+        bytes rootDomain;
+        require(rootDomains[rootDomain] != 0x0);
+
+        return rootDomain;
+    }
+
+    function getLabelHash(bytes memory name) internal view returns (bytes32) {
         uint len = name.readUint8(0);
         // Check this name is a direct subdomain of the one we're responsible for
-        require(name.equals(len + 1, rootDomain));
         return name.keccak(1, len);
     }
 
