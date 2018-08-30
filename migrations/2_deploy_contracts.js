@@ -19,7 +19,7 @@ module.exports = function(deployer, network, accounts) {
     deployer.deploy([[ENSRegistry], [DummyDNSSEC]]).then(function() {
       return ENSRegistry.deployed().then(function(ens) {
         return DummyDNSSEC.deployed().then(function(dnssec) {
-          return deployer.deploy(DNSRegistrar, dnssec.address, ens.address, dns.hexEncodeName(tld + "."), namehash.hash(tld)).then(function() {
+          return deployer.deploy(DNSRegistrar, dnssec.address, ens.address).then(function() {
             return DNSRegistrar.deployed().then(function(registrar) {
               return ens.setSubnodeOwner(0, "0x" + sha3(tld), registrar.address);
             });
