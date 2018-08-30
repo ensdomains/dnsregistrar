@@ -1,6 +1,6 @@
 var ENSRegistry = artifacts.require("@ensdomains/ens/ENSRegistry");
 var DummyDNSSEC = artifacts.require("./DummyDNSSEC");
-var DNSRegistrar = artifacts.require("./DNSRegistrar.sol");
+var DNSRegistrar = artifacts.require("./DNSRegistrar");
 
 var namehash = require('eth-ens-namehash');
 var sha3 = require('js-sha3').keccak_256
@@ -21,9 +21,7 @@ module.exports = function(deployer, network, accounts) {
         return DummyDNSSEC.deployed().then(function(dnssec) {
           return deployer.deploy(DNSRegistrar, dnssec.address, ens.address).then(function() {
             return DNSRegistrar.deployed().then(function(registrar) {
-              return registrar.addRootDomain(dns.hexEncodeName(tld + "."), namehash.hash(tld)).then(function () {
-                  return ens.setSubnodeOwner(0, "0x" + sha3(tld), registrar.address);
-              })
+              return ens.setSubnodeOwner(0, "0x" + sha3(tld), registrar.address);
             });
           });
         });

@@ -1,6 +1,6 @@
 var ENSRegistry = artifacts.require('./ENSRegistry.sol');
 var DummyDNSSEC = artifacts.require('./DummyDNSSEC.sol');
-var DNSRegistrarContract = artifacts.require('./DNSRegistrar.sol');
+var DNSRegistrarContract = artifacts.require('./DNSRegistrar');
 var namehash = require('eth-ens-namehash');
 var dns = require('../lib/dns.js');
 var sha3 = require('js-sha3').keccak_256;
@@ -24,14 +24,12 @@ contract('DNSRegistrar', function(accounts) {
       ens.address
     );
     dnssecAddress = registrar.oracle.call();
-    await registrar.addRootDomain(dns.hexEncodeName(tld + '.'), namehash.hash(tld));
     await ens.setSubnodeOwner(0, '0x' + sha3(tld), registrar.address);
   });
 
   it('allows the owner of a DNS name to claim it in ENS', async function() {
     assert.equal(await registrar.oracle(), dnssec.address);
     assert.equal(await registrar.ens(), ens.address);
-    assert.equal(await registrar.rootDomains.call(dns.hexEncodeName('test.')), namehash.hash(tld));
 
     var proof = dns.hexEncodeTXT({
       name: '_ens.foo.test.',

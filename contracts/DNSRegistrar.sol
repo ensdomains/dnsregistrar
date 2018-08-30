@@ -2,7 +2,6 @@ pragma solidity ^0.4.23;
 
 import "@ensdomains/ens/contracts/ENSRegistry.sol";
 import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
-import "@ensdomains/dnssec-oracle/contracts/Owned.sol";
 import "@ensdomains/dnssec-oracle/contracts/BytesUtils.sol";
 import "@ensdomains/dnssec-oracle/contracts/RRUtils.sol";
 
@@ -10,7 +9,7 @@ import "@ensdomains/dnssec-oracle/contracts/RRUtils.sol";
  * @dev An ENS registrar that allows the owner of a DNS name to claim the
  *      corresponding name in ENS.
  */
-contract DNSRegistrar is Owned {
+contract DNSRegistrar {
     using BytesUtils for bytes;
     using RRUtils for *;
     using Buffer for Buffer.buffer;
@@ -21,17 +20,11 @@ contract DNSRegistrar is Owned {
     DNSSEC public oracle;
     ENS public ens;
 
-    mapping (bytes32 => bytes32) public rootDomains;
-
     event Claim(bytes32 indexed node, address indexed owner, bytes dnsname);
 
     constructor(DNSSEC _dnssec, ENS _ens) public {
         oracle = _dnssec;
         ens = _ens;
-    }
-
-    function addRootDomain(bytes32 rootDomain, bytes32 rootNode) owner_only {
-        rootDomains[rootDomain] = rootNode;
     }
 
     /**
@@ -44,13 +37,11 @@ contract DNSRegistrar is Owned {
      *        record.
      */
     function claim(bytes name, bytes proof) public {
-        bytes32 domain = getRootDomain(name);
         bytes32 labelHash = getLabelHash(name);
 
         address addr = getOwnerAddress(name, proof);
 
-        bytes32 rootNode = rootDomains[domain];
-
+        bytes32 rootNode = getRootNode(name);
         ens.setSubnodeOwner(rootNode, labelHash, addr);
         emit Claim(keccak256(abi.encodePacked(rootNode, labelHash)), addr, name);
     }
@@ -67,14 +58,11 @@ contract DNSRegistrar is Owned {
         claim(name, proof);
     }
 
-    function getRootDomain(bytes memory name) internal view returns (bytes32) {
+    function getRootNode(bytes memory name) internal view returns (bytes32) {
         uint len = name.readUint8(0);
         uint rootLen = name.readUint8(len + 1);
 
-        bytes32 rootDomain = name.readBytesN(len + 1 + rootLen, rootLen + 1);
-        require(rootDomains[rootDomain] != 0x0);
-
-        return rootDomain;
+        return name.keccak(len + 1 + 1, rootLen);
     }
 
     function getLabelHash(bytes memory name) internal view returns (bytes32) {
