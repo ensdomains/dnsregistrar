@@ -1,13 +1,13 @@
-var ENSRegistry = artifacts.require("@ensdomains/ens/ENSRegistry");
-var DummyDNSSEC = artifacts.require("./DummyDNSSEC");
-var DNSRegistrar = artifacts.require("./DNSRegistrar");
+const ENSRegistry = artifacts.require("@ensdomains/ens/ENSRegistry");
+const DummyDNSSEC = artifacts.require("./DummyDNSSEC");
+const DNSRegistrar = artifacts.require("./DNSRegistrar");
 
-var namehash = require('eth-ens-namehash');
-var sha3 = require('js-sha3').keccak_256
-var dns = require('../lib/dns.js');
-var tld = 'xyz'
+const namehash = require('eth-ens-namehash');
+const sha3 = require('js-sha3').keccak_256;
+const dns = require('../lib/dns.js');
+const tld = 'xyz';
 
-module.exports = function(deployer, network, accounts) {
+module.exports = function(deployer, network) {
     return deployer.then(async () => {
 
         if (network == "ropsten") {
