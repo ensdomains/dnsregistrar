@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@ensdomains/buffer": "0.0.5",
-    "@ensdomains/dnsprovejs": "0.0.4",
+    "@ensdomains/dnsprovejs": "0.0.8",
     "@ensdomains/dnssec-oracle": "0.0.7",
     "@ensdomains/ens": "^0.1.1",
     "eth-ens-namehash": "^2.0.8",
