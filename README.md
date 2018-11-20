@@ -31,6 +31,13 @@ dnsregistrar.claim('foo.test').then((claim)=>{
 })
 ```
 
+
+NOTE: `submit()` calls different functions depending on the following three different conditions
+
+- if not all proofs on DNSSEC oracle are valid, it will send proof to DNSSEC Oracle and claim ETH address.
+- if all proofs on DNSSEC oracle are valid, it will not send proof to DNSSEC Oracle and just claim ETH address.
+- if `nsec` is found, it deletes proof on DNSSEC oracle, then set ETH address to empty.
+
 ## Contribution guide
 
 #### Setting up
