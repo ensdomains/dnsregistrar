@@ -1,5 +1,6 @@
 pragma solidity ^0.4.24;
 
+import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
 import "@ensdomains/dnssec-oracle/contracts/BytesUtils.sol";
 import "@ensdomains/dnssec-oracle/contracts/RRUtils.sol";
 import "@ensdomains/buffer/contracts/Buffer.sol";
@@ -10,6 +11,9 @@ library ParsingLibrary {
     using RRUtils for *;
     using Buffer for Buffer.buffer;
 
+    uint16 constant CLASS_INET = 1;
+    uint16 constant TYPE_TXT = 16;
+
     function getLabels(bytes memory name) internal view returns (bytes32, bytes32) {
         uint len = name.readUint8(0);
         uint second = name.readUint8(len + 1);
@@ -19,7 +23,7 @@ library ParsingLibrary {
         return (name.keccak(1, len), keccak256(bytes32(0), name.keccak(2 + len, second)));
     }
 
-    function getOwnerAddress(bytes memory name, bytes memory proof) internal view returns (address) {
+    function getOwnerAddress(DNSSEC oracle, bytes memory name, bytes memory proof) internal view returns (address) {
         // Add "_ens." to the front of the name.
         Buffer.buffer memory buf;
         buf.init(name.length + 5);

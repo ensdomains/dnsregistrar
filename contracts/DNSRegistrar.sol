@@ -10,9 +10,6 @@ import "./ParsingLibrary.sol";
  */
 contract DNSRegistrar {
 
-    uint16 constant CLASS_INET = 1;
-    uint16 constant TYPE_TXT = 16;
-
     DNSSEC public oracle;
     ENS public ens;
 
@@ -33,7 +30,7 @@ contract DNSRegistrar {
      *        record.
      */
     function claim(bytes name, bytes proof) public {
-        address addr = ParsingLibrary.getOwnerAddress(name, proof);
+        address addr = ParsingLibrary.getOwnerAddress(oracle, name, proof);
 
         bytes32 labelHash;
         bytes32 rootNode;
