@@ -2,7 +2,7 @@ pragma solidity ^0.4.23;
 
 import "@ensdomains/ens/contracts/ENSRegistry.sol";
 import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
-import "./ParsingLibrary.sol";
+import "./DNSClaimChecker.sol";
 
 /**
  * @dev An ENS registrar that allows the owner of a DNS name to claim the
@@ -30,11 +30,11 @@ contract DNSRegistrar {
      *        record.
      */
     function claim(bytes name, bytes proof) public {
-        address addr = ParsingLibrary.getOwnerAddress(oracle, name, proof);
+        address addr = DNSClaimChecker.getOwnerAddress(oracle, name, proof);
 
         bytes32 labelHash;
         bytes32 rootNode;
-        (labelHash, rootNode) = ParsingLibrary.getLabels(name);
+        (labelHash, rootNode) = DNSClaimChecker.getLabels(name);
         
         ens.setSubnodeOwner(rootNode, labelHash, addr);
         emit Claim(keccak256(abi.encodePacked(rootNode, labelHash)), addr, name);

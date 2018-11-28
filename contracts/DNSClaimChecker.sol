@@ -5,7 +5,7 @@ import "@ensdomains/dnssec-oracle/contracts/BytesUtils.sol";
 import "@ensdomains/dnssec-oracle/contracts/RRUtils.sol";
 import "@ensdomains/buffer/contracts/Buffer.sol";
 
-library ParsingLibrary {
+library DNSClaimChecker {
 
     using BytesUtils for bytes;
     using RRUtils for *;
