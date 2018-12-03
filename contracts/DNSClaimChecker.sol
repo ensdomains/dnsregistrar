@@ -23,7 +23,11 @@ library DNSClaimChecker {
         return (name.keccak(1, len), keccak256(bytes32(0), name.keccak(2 + len, second)));
     }
 
-    function getOwnerAddress(DNSSEC oracle, bytes memory name, bytes memory proof) internal view returns (address) {
+    function getOwnerAddress(DNSSEC oracle, bytes memory name, bytes memory proof, address default)
+        internal
+        view
+        returns (address)
+    {
         // Add "_ens." to the front of the name.
         Buffer.buffer memory buf;
         buf.init(name.length + 5);
@@ -33,7 +37,7 @@ library DNSClaimChecker {
         uint64 inserted;
         // Check the provided TXT record has been validated by the oracle
         (, inserted, hash) = oracle.rrdata(TYPE_TXT, buf.buf);
-        if (hash == bytes20(0) && proof.length == 0) return 0;
+        if (hash == bytes20(0) && proof.length == 0) return default;
 
         require(hash == bytes20(keccak256(proof)));
 
