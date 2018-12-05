@@ -10,6 +10,8 @@ Welcome to dnsregistrar's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   introduction
+   libraries
 
 
 Indices and tables
