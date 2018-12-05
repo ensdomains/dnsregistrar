@@ -11,6 +11,8 @@ DnsRegistrar
 
 
 .. autofunction:: Claim#getOwner
+.. autofunction:: Claim#getOracle
+.. autofunction:: Claim#getResult
 .. autofunction:: Claim#submit
 
 
