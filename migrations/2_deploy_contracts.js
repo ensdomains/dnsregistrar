@@ -1,10 +1,10 @@
 const ENSRegistry = artifacts.require("@ensdomains/ens/ENSRegistry");
 const DummyDNSSEC = artifacts.require("./DummyDNSSEC");
 const DNSRegistrar = artifacts.require("./DNSRegistrar");
-
 const namehash = require('eth-ens-namehash');
 const sha3 = require('js-sha3').keccak_256;
-const dns = require('../lib/dns.js');
+const packet = require('dns-packet');
+
 const tld = 'xyz';
 
 module.exports = function(deployer, network) {
@@ -15,7 +15,7 @@ module.exports = function(deployer, network) {
                 DNSRegistrar,
                 "0xd7296B6044ffD0565062345c2EaA4017024B2D22",
                 "0x112234455c3a32fd11230c42e7bccd4a84e02010",
-                dns.hexEncodeName(tld + "."),
+                '0x' + packet.name.encode(tld).toString('hex'),
                 namehash.hash(tld)
             );
             return;
