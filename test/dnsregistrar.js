@@ -2,11 +2,17 @@ var ENSRegistry = artifacts.require('./ENSRegistry.sol');
 var DummyDNSSEC = artifacts.require('./DummyDNSSEC.sol');
 var DNSRegistrarContract = artifacts.require('./DNSRegistrar.sol');
 var namehash = require('eth-ens-namehash');
-var dns = require('../lib/dns.js');
 var sha3 = require('js-sha3').keccak_256;
-var DnsProve = require('@ensdomains/dnsprovejs');
-var sinon = require('sinon');
-var DNSRegistrar = require('../lib/dnsregistrar');
+
+var packet = require('dns-packet');
+
+function hexEncodeName(name){
+  return '0x' + packet.name.encode(name).toString('hex');
+}
+
+function hexEncodeTXT(keys){
+  return '0x' + packet.answer.encode(keys).toString('hex');
+}
 
 contract('DNSRegistrar', function(accounts) {
   var registrar = null;
@@ -31,22 +37,24 @@ contract('DNSRegistrar', function(accounts) {
     assert.equal(await registrar.oracle(), dnssec.address);
     assert.equal(await registrar.ens(), ens.address);
 
-    var proof = dns.hexEncodeTXT({
-      name: '_ens.foo.test.',
-      klass: 1,
-      ttl: 3600,
-      text: ['a=' + accounts[0]]
+    var proof = hexEncodeTXT({
+      name:'_ens.foo.test',
+      type:'TXT',
+      class:'IN',
+      ttl:3600,
+      data:['a=' + accounts[0]]
     });
+
     var tx = await dnssec.setData(
       16,
-      dns.hexEncodeName('_ens.foo.test.'),
+      hexEncodeName('_ens.foo.test'),
       now,
       now,
       proof
     );
     assert.equal(parseInt(tx.receipt.status), 1);
 
-    tx = await registrar.claim(dns.hexEncodeName('foo.test.'), proof);
+    tx = await registrar.claim(hexEncodeName('foo.test'), proof);
     assert.equal(parseInt(tx.receipt.status), 1);
 
     assert.equal(await ens.owner(namehash.hash('foo.test')), accounts[0]);
@@ -55,36 +63,38 @@ contract('DNSRegistrar', function(accounts) {
   it('allows anyone to zero out an obsolete name', async function() {
     var tx = await dnssec.setData(
       16,
-      dns.hexEncodeName('_ens.foo.test.'),
+      hexEncodeName('_ens.foo.test'),
       now,
       now,
       ''
     );
     assert.equal(parseInt(tx.receipt.status), 1);
 
-    tx = await registrar.claim(dns.hexEncodeName('foo.test.'), '');
+    tx = await registrar.claim(hexEncodeName('foo.test'), '');
     assert.equal(parseInt(tx.receipt.status), 1);
 
     assert.equal(await ens.owner(namehash.hash('foo.test')), 0);
   });
 
   it('allows anyone to update a DNSSEC referenced name', async function() {
-    var proof = dns.hexEncodeTXT({
-      name: '_ens.foo.test.',
-      klass: 1,
-      ttl: 3600,
-      text: ['a=0x0123456789012345678901234567890123456789']
+    var proof = hexEncodeTXT({
+      name:'_ens.foo.test',
+      type:'TXT',
+      class:'IN',
+      ttl:3600,
+      data:['a=0x0123456789012345678901234567890123456789']
     });
+
     var tx = await dnssec.setData(
       16,
-      dns.hexEncodeName('_ens.foo.test.'),
+      hexEncodeName('_ens.foo.test'),
       now,
       now,
       proof
     );
     assert.equal(parseInt(tx.receipt.status), 1);
 
-    tx = await registrar.claim(dns.hexEncodeName('foo.test.'), proof);
+    tx = await registrar.claim(hexEncodeName('foo.test'), proof);
     assert.equal(parseInt(tx.receipt.status), 1);
     assert.equal(
       await ens.owner(namehash.hash('foo.test')),
@@ -93,15 +103,17 @@ contract('DNSRegistrar', function(accounts) {
   });
 
   it('does not allow updates with stale records', async function() {
-    var proof = dns.hexEncodeTXT({
-      name: '_ens.bar.test.',
-      klass: 1,
-      ttl: 3600,
-      text: ['a=' + accounts[0]]
+    var proof = hexEncodeTXT({
+      name:'_ens.bar.test',
+      type:'TXT',
+      class:'IN',
+      ttl:3600,
+      data:['a=' + accounts[0]]
     });
+
     var tx = await dnssec.setData(
       16,
-      dns.hexEncodeName('_ens.foo.test.'),
+      hexEncodeName('_ens.foo.test'),
       0,
       0,
       proof
@@ -110,7 +122,7 @@ contract('DNSRegistrar', function(accounts) {
 
     tx = undefined;
     try {
-      tx = await registrar.claim(dns.hexEncodeName('bar.test.'), proof);
+      tx = await registrar.claim(hexEncodeName('bar.test'), proof);
     } catch (error) {
       // Assert ganache revert exception
       assert.equal(
