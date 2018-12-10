@@ -44,7 +44,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
-    "eth-gas-reporter": "^0.1.2",
+    "eth-gas-reporter": "^0.1.12",
     "prettier": "^1.13.7",
     "sinon": "^6.0.0",
     "solium": "^1.1.8",
