@@ -41,8 +41,9 @@ contract('DNSRegistrar', function(accounts) {
       name:'_ens.foo.test',
       type:'TXT',
       class:'IN',
-      ttl:3600, data:['a=' + accounts[0]]
-    })
+      ttl:3600,
+      data:['a=' + accounts[0]]
+    });
 
     var tx = await dnssec.setData(
       16,
@@ -80,8 +81,9 @@ contract('DNSRegistrar', function(accounts) {
       name:'_ens.foo.test',
       type:'TXT',
       class:'IN',
-      ttl:3600, data:['a=0x0123456789012345678901234567890123456789']
-    })
+      ttl:3600,
+      data:['a=0x0123456789012345678901234567890123456789']
+    });
 
     var tx = await dnssec.setData(
       16,
@@ -105,8 +107,9 @@ contract('DNSRegistrar', function(accounts) {
       name:'_ens.bar.test',
       type:'TXT',
       class:'IN',
-      ttl:3600, data:['a=' + accounts[0]]
-    })
+      ttl:3600,
+      data:['a=' + accounts[0]]
+    });
 
     var tx = await dnssec.setData(
       16,
