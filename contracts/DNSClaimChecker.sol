@@ -56,7 +56,13 @@ library DNSClaimChecker {
     function parseRR(bytes memory rdata, uint idx, address defaultAddr) internal pure returns (address) {
         while (idx < rdata.length) {
             uint len = rdata.readUint8(idx); idx += 1;
-            address addr = parseString(rdata, idx, len);
+
+            bool succeeded;
+            address addr;
+
+            (addr, succeeded) = parseString(rdata, idx, len);
+
+            if (!succeeded) return defaultAddr;
             if (addr != 0) return addr;
             idx += len;
         }
@@ -64,15 +70,15 @@ library DNSClaimChecker {
         return defaultAddr;
     }
 
-    function parseString(bytes memory str, uint idx, uint len) internal pure returns (address) {
+    function parseString(bytes memory str, uint idx, uint len) internal pure returns (address, bool) {
         // TODO: More robust parsing that handles whitespace and multiple key/value pairs
-        if (str.readUint32(idx) != 0x613d3078) return 0; // 0x613d3078 == 'a=0x'
-        if (len < 44) return 0;
+        if (str.readUint32(idx) != 0x613d3078) return (0, true); // 0x613d3078 == 'a=0x'
+        if (len < 44) return (0, true);
         return hexToAddress(str, idx + 4);
     }
 
-    function hexToAddress(bytes memory str, uint idx) internal pure returns (address) {
-        if (str.length - idx < 40) return 0;
+    function hexToAddress(bytes memory str, uint idx) internal pure returns (address, bool) {
+        if (str.length - idx < 40) return (0, false);
         uint ret = 0;
         for (uint i = idx; i < idx + 40; i++) {
             ret <<= 4;
@@ -84,10 +90,10 @@ library DNSClaimChecker {
             } else if (x >= 97 && x < 103) {
                 ret |= x - 87;
             } else {
-                return 0;
+                return (0, false);
             }
         }
-        return address(ret);
+        return (address(ret), true);
     }
 
 }
