@@ -44,16 +44,16 @@ library DNSClaimChecker {
         for (RRUtils.RRIterator memory iter = proof.iterateRRs(0); !iter.done(); iter.next()) {
             require(inserted + iter.ttl >= now, "DNS record is stale; refresh or delete it before proceeding.");
 
-            address addr = parseRR(proof, iter.rdataOffset);
+            address addr = parseRR(proof, iter.rdataOffset, defaultAddr);
             if (addr != 0) {
                 return addr;
             }
         }
 
-        return 0;
+        return defaultAddr;
     }
 
-    function parseRR(bytes memory rdata, uint idx) internal pure returns (address) {
+    function parseRR(bytes memory rdata, uint idx, address defaultAddr) internal pure returns (address) {
         while (idx < rdata.length) {
             uint len = rdata.readUint8(idx); idx += 1;
             address addr = parseString(rdata, idx, len);
@@ -61,7 +61,7 @@ library DNSClaimChecker {
             idx += len;
         }
 
-        return 0;
+        return defaultAddr;
     }
 
     function parseString(bytes memory str, uint idx, uint len) internal pure returns (address) {
