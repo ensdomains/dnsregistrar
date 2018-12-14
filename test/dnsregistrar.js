@@ -82,7 +82,7 @@ contract('DNSRegistrar', function(accounts) {
       type:'TXT',
       class:'IN',
       ttl:3600,
-      data:['a=0x0123456789012345678901234567890123456789']
+      data:['a=' + accounts[1]]
     });
 
     var tx = await dnssec.setData(
@@ -98,7 +98,7 @@ contract('DNSRegistrar', function(accounts) {
     assert.equal(parseInt(tx.receipt.status), 1);
     assert.equal(
       await ens.owner(namehash.hash('foo.test')),
-      '0x0123456789012345678901234567890123456789'
+      accounts[1]
     );
   });
 
