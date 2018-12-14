@@ -50,24 +50,29 @@ library DNSClaimChecker {
             }
         }
 
-        return defaultAddr;
+        return 0;
     }
 
     function parseRR(bytes memory rdata, uint idx, address defaultAddr) internal pure returns (address) {
+        bool didError = false;
+
         while (idx < rdata.length) {
             uint len = rdata.readUint8(idx); idx += 1;
 
             bool succeeded;
             address addr;
-
             (addr, succeeded) = parseString(rdata, idx, len);
 
-            if (!succeeded) return defaultAddr;
+            if (!succeeded) {
+                didError = true;
+            }
+
             if (addr != 0) return addr;
             idx += len;
         }
 
-        return defaultAddr;
+        if (didError) return defaultAddr;
+        return 0x0;
     }
 
     function parseString(bytes memory str, uint idx, uint len) internal pure returns (address, bool) {
