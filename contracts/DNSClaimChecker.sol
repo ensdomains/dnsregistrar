@@ -45,8 +45,8 @@ library DNSClaimChecker {
         for (RRUtils.RRIterator memory iter = proof.iterateRRs(0); !iter.done(); iter.next()) {
             require(inserted + iter.ttl >= now, "DNS record is stale; refresh or delete it before proceeding.");
 
-            address found;
-            (addr, error) = parseRR(proof, iter.rdataOffset);
+            address addr;
+            (addr, found) = parseRR(proof, iter.rdataOffset);
             if (addr != 0) {
                 return (addr, true);
             }
