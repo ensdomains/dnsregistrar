@@ -41,40 +41,39 @@ library DNSClaimChecker {
 
         require(hash == bytes20(keccak256(proof)));
 
-        bool found = true;
         for (RRUtils.RRIterator memory iter = proof.iterateRRs(0); !iter.done(); iter.next()) {
             require(inserted + iter.ttl >= now, "DNS record is stale; refresh or delete it before proceeding.");
 
+            bool found;
             address addr;
             (addr, found) = parseRR(proof, iter.rdataOffset);
-            if (addr != 0) {
+            if (found) {
                 return (addr, true);
             }
         }
 
-        return (0, found);
+        return (0x0, false);
     }
 
     function parseRR(bytes memory rdata, uint idx) internal pure returns (address, bool) {
-        bool found = true;
-
         while (idx < rdata.length) {
             uint len = rdata.readUint8(idx); idx += 1;
 
+            bool found;
             address addr;
             (addr, found) = parseString(rdata, idx, len);
 
-            if (addr != 0) return (addr, true);
+            if (found) return (addr, true);
             idx += len;
         }
 
-        return (0x0, found);
+        return (0x0, false);
     }
 
     function parseString(bytes memory str, uint idx, uint len) internal pure returns (address, bool) {
         // TODO: More robust parsing that handles whitespace and multiple key/value pairs
-        if (str.readUint32(idx) != 0x613d3078) return (0, true); // 0x613d3078 == 'a=0x'
-        if (len < 44) return (0, true); // @todo should this really be false? or do we want a true cause it did error?
+        if (str.readUint32(idx) != 0x613d3078) return (0, false); // 0x613d3078 == 'a=0x'
+        if (len < 44) return (0, false);
         return hexToAddress(str, idx + 4);
     }
 
