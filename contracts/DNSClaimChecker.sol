@@ -74,7 +74,7 @@ library DNSClaimChecker {
     function parseString(bytes memory str, uint idx, uint len) internal pure returns (address, bool) {
         // TODO: More robust parsing that handles whitespace and multiple key/value pairs
         if (str.readUint32(idx) != 0x613d3078) return (0, false); // 0x613d3078 == 'a=0x'
-        if (len < 44) return (0, false);
+        if (len < 44) return (0, false); // @todo should this really be false? or do we want a true cause it did error?
         return hexToAddress(str, idx + 4);
     }
 
