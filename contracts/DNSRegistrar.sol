@@ -30,7 +30,8 @@ contract DNSRegistrar {
      *        record.
      */
     function claim(bytes name, bytes proof) public {
-        address addr = DNSClaimChecker.getOwnerAddress(oracle, name, proof, 0x0);
+        address addr;
+        (addr,) = DNSClaimChecker.getOwnerAddress(oracle, name, proof);
 
         bytes32 labelHash;
         bytes32 rootNode;
