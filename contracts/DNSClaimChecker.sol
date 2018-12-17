@@ -23,10 +23,10 @@ library DNSClaimChecker {
         return (name.keccak(1, len), keccak256(bytes32(0), name.keccak(2 + len, second)));
     }
 
-    function getOwnerAddress(DNSSEC oracle, bytes memory name, bytes memory proof, address defaultAddr)
+    function getOwnerAddress(DNSSEC oracle, bytes memory name, bytes memory proof)
         internal
         view
-        returns (address)
+        returns (address, bool)
     {
         // Add "_ens." to the front of the name.
         Buffer.buffer memory buf;
@@ -37,23 +37,25 @@ library DNSClaimChecker {
         uint64 inserted;
         // Check the provided TXT record has been validated by the oracle
         (, inserted, hash) = oracle.rrdata(TYPE_TXT, buf.buf);
-        if (hash == bytes20(0) && proof.length == 0) return defaultAddr;
+        if (hash == bytes20(0) && proof.length == 0) return (0x0, true);
 
         require(hash == bytes20(keccak256(proof)));
 
+        bool error = false;
         for (RRUtils.RRIterator memory iter = proof.iterateRRs(0); !iter.done(); iter.next()) {
             require(inserted + iter.ttl >= now, "DNS record is stale; refresh or delete it before proceeding.");
 
-            address addr = parseRR(proof, iter.rdataOffset, defaultAddr);
+            address addr;
+            (addr, error) = parseRR(proof, iter.rdataOffset);
             if (addr != 0) {
-                return addr;
+                return (addr, false);
             }
         }
 
-        return 0;
+        return (0, error);
     }
 
-    function parseRR(bytes memory rdata, uint idx, address defaultAddr) internal pure returns (address) {
+    function parseRR(bytes memory rdata, uint idx) internal pure returns (address, bool) {
         bool error = false;
 
         while (idx < rdata.length) {
@@ -62,12 +64,11 @@ library DNSClaimChecker {
             address addr;
             (addr, error) = parseString(rdata, idx, len);
 
-            if (addr != 0) return addr;
+            if (addr != 0) return (addr, false);
             idx += len;
         }
 
-        if (error) return defaultAddr;
-        return 0x0;
+        return (0x0, error);
     }
 
     function parseString(bytes memory str, uint idx, uint len) internal pure returns (address, bool) {
