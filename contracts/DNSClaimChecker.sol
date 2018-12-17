@@ -37,44 +37,44 @@ library DNSClaimChecker {
         uint64 inserted;
         // Check the provided TXT record has been validated by the oracle
         (, inserted, hash) = oracle.rrdata(TYPE_TXT, buf.buf);
-        if (hash == bytes20(0) && proof.length == 0) return (0x0, true);
+        if (hash == bytes20(0) && proof.length == 0) return (0x0, false);
 
         require(hash == bytes20(keccak256(proof)));
 
-        bool error = false;
+        bool found = true;
         for (RRUtils.RRIterator memory iter = proof.iterateRRs(0); !iter.done(); iter.next()) {
             require(inserted + iter.ttl >= now, "DNS record is stale; refresh or delete it before proceeding.");
 
-            address addr;
+            address found;
             (addr, error) = parseRR(proof, iter.rdataOffset);
             if (addr != 0) {
-                return (addr, false);
+                return (addr, true);
             }
         }
 
-        return (0, error);
+        return (0, found);
     }
 
     function parseRR(bytes memory rdata, uint idx) internal pure returns (address, bool) {
-        bool error = false;
+        bool found = true;
 
         while (idx < rdata.length) {
             uint len = rdata.readUint8(idx); idx += 1;
 
             address addr;
-            (addr, error) = parseString(rdata, idx, len);
+            (addr, found) = parseString(rdata, idx, len);
 
-            if (addr != 0) return (addr, false);
+            if (addr != 0) return (addr, true);
             idx += len;
         }
 
-        return (0x0, error);
+        return (0x0, found);
     }
 
     function parseString(bytes memory str, uint idx, uint len) internal pure returns (address, bool) {
         // TODO: More robust parsing that handles whitespace and multiple key/value pairs
-        if (str.readUint32(idx) != 0x613d3078) return (0, false); // 0x613d3078 == 'a=0x'
-        if (len < 44) return (0, false); // @todo should this really be false? or do we want a true cause it did error?
+        if (str.readUint32(idx) != 0x613d3078) return (0, true); // 0x613d3078 == 'a=0x'
+        if (len < 44) return (0, true); // @todo should this really be false? or do we want a true cause it did error?
         return hexToAddress(str, idx + 4);
     }
 
@@ -91,10 +91,10 @@ library DNSClaimChecker {
             } else if (x >= 97 && x < 103) {
                 ret |= x - 87;
             } else {
-                return (0, true);
+                return (0, false);
             }
         }
-        return (address(ret), false);
+        return (address(ret), true);
     }
 
 }
