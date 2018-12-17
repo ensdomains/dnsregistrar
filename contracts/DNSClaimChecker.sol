@@ -72,13 +72,13 @@ library DNSClaimChecker {
 
     function parseString(bytes memory str, uint idx, uint len) internal pure returns (address, bool) {
         // TODO: More robust parsing that handles whitespace and multiple key/value pairs
-        if (str.readUint32(idx) != 0x613d3078) return (0, false); // 0x613d3078 == 'a=0x'
+        if (str.readUint32(idx) != 0x613d3078) return (0x0, false); // 0x613d3078 == 'a=0x'
         if (len < 44) return (0, false);
         return hexToAddress(str, idx + 4);
     }
 
     function hexToAddress(bytes memory str, uint idx) internal pure returns (address, bool) {
-        if (str.length - idx < 40) return (0, true);
+        if (str.length - idx < 40) return (0x0, false);
         uint ret = 0;
         for (uint i = idx; i < idx + 40; i++) {
             ret <<= 4;
