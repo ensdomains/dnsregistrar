@@ -30,7 +30,7 @@ contract('DNSRegistrar', function(accounts) {
       ens.address
     );
     dnssecAddress = registrar.oracle.call();
-    await ens.setSubnodeOwner(0, '0x' + sha3(tld), registrar.address);
+    await ens.setSubnodeOwner('0x0', '0x' + sha3(tld), registrar.address);
   });
 
   it('allows the owner of a DNS name to claim it in ENS', async function() {
