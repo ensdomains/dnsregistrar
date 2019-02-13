@@ -4,15 +4,7 @@ var DNSRegistrarContract = artifacts.require('./DNSRegistrar.sol');
 var namehash = require('eth-ens-namehash');
 var sha3 = require('js-sha3').keccak_256;
 
-var packet = require('dns-packet');
-
-function hexEncodeName(name){
-  return '0x' + packet.name.encode(name).toString('hex');
-}
-
-function hexEncodeTXT(keys){
-  return '0x' + packet.answer.encode(keys).toString('hex');
-}
+var dns = require('../lib/dns.js');
 
 contract('DNSRegistrar', function(accounts) {
   var registrar = null;
@@ -37,7 +29,7 @@ contract('DNSRegistrar', function(accounts) {
     assert.equal(await registrar.oracle(), dnssec.address);
     assert.equal(await registrar.ens(), ens.address);
 
-    var proof = hexEncodeTXT({
+    var proof = dns.hexEncodeTXT({
       name:'_ens.foo.test',
       type:'TXT',
       class:'IN',
@@ -77,7 +69,7 @@ contract('DNSRegistrar', function(accounts) {
   });
 
   it('allows anyone to update a DNSSEC referenced name', async function() {
-    var proof = hexEncodeTXT({
+    var proof = dns.hexEncodeTXT({
       name:'_ens.foo.test',
       type:'TXT',
       class:'IN',
@@ -103,7 +95,7 @@ contract('DNSRegistrar', function(accounts) {
   });
 
   it('does not allow updates with stale records', async function() {
-    var proof = hexEncodeTXT({
+    var proof = dns.hexEncodeTXT({
       name:'_ens.bar.test',
       type:'TXT',
       class:'IN',
