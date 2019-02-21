@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.5.0;
 
 contract DummyDNSSEC {
     uint16 expectedType;
@@ -7,7 +7,7 @@ contract DummyDNSSEC {
     uint64 inserted;
     bytes20 hash;
 
-    function setData(uint16 _expectedType, bytes _expectedName, uint32 _inception, uint64 _inserted, bytes _proof) public {
+    function setData(uint16 _expectedType, bytes memory _expectedName, uint32 _inception, uint64 _inserted, bytes memory _proof) public {
         expectedType = _expectedType;
         expectedName = _expectedName;
         inception = _inception;
@@ -17,7 +17,7 @@ contract DummyDNSSEC {
         }
     }
 
-    function rrdata(uint16 dnstype, bytes name) public constant returns(uint32, uint64, bytes20) {
+    function rrdata(uint16 dnstype, bytes memory name) public view returns (uint32, uint64, bytes20) {
         require(dnstype == expectedType);
         require(keccak256(name) == keccak256(expectedName));
         return (inception, inserted, hash);
