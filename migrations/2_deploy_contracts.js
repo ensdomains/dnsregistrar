@@ -21,7 +21,8 @@ module.exports = function(deployer, network) {
             return;
         }
 
-        await deployer.deploy([[ENSRegistry], [DummyDNSSEC]]);
+        await deployer.deploy(ENSRegistry);
+        await deployer.deploy(DummyDNSSEC);
 
         const ens = await ENSRegistry.deployed();
         const dnssec = await DummyDNSSEC.deployed();
@@ -29,6 +30,6 @@ module.exports = function(deployer, network) {
         await deployer.deploy(DNSRegistrar, dnssec.address, ens.address);
         const registrar = await DNSRegistrar.deployed();
 
-        await ens.setSubnodeOwner(0, "0x" + sha3(tld), registrar.address);
+        await ens.setSubnodeOwner("0x0", "0x" + sha3(tld), registrar.address);
     });
 };
