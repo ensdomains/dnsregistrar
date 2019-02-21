@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.5.0;
 
 import "@ensdomains/ens/contracts/ENSRegistry.sol";
 import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
@@ -29,7 +29,7 @@ contract DNSRegistrar {
      *        the name will be transferred to the address specified in the TXT
      *        record.
      */
-    function claim(bytes name, bytes proof) public {
+    function claim(bytes memory name, bytes memory proof) public {
         address addr;
         (addr,) = DNSClaimChecker.getOwnerAddress(oracle, name, proof);
 
@@ -48,7 +48,7 @@ contract DNSRegistrar {
      *        proof must be the TXT record required by the registrar.
      * @param proof The proof record for the first element in input.
      */
-    function proveAndClaim(bytes name, bytes input, bytes proof) public {
+    function proveAndClaim(bytes memory name, bytes memory input, bytes memory proof) public {
         proof = oracle.submitRRSets(input, proof);
         claim(name, proof);
     }

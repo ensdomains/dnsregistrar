@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
 import "@ensdomains/dnssec-oracle/contracts/BytesUtils.sol";
@@ -20,7 +20,7 @@ library DNSClaimChecker {
 
         require(name.readUint8(len + second + 2) == 0);
 
-        return (name.keccak(1, len), keccak256(bytes32(0), name.keccak(2 + len, second)));
+        return (name.keccak(1, len), keccak256(abi.encodePacked(bytes32(0), name.keccak(2 + len, second))));
     }
 
     function getOwnerAddress(DNSSEC oracle, bytes memory name, bytes memory proof)
@@ -37,7 +37,7 @@ library DNSClaimChecker {
         uint64 inserted;
         // Check the provided TXT record has been validated by the oracle
         (, inserted, hash) = oracle.rrdata(TYPE_TXT, buf.buf);
-        if (hash == bytes20(0) && proof.length == 0) return (0x0, false);
+        if (hash == bytes20(0) && proof.length == 0) return (address(0x0), false);
 
         require(hash == bytes20(keccak256(proof)));
 
@@ -52,7 +52,7 @@ library DNSClaimChecker {
             }
         }
 
-        return (0x0, false);
+        return (address(0x0), false);
     }
 
     function parseRR(bytes memory rdata, uint idx) internal pure returns (address, bool) {
@@ -67,18 +67,18 @@ library DNSClaimChecker {
             idx += len;
         }
 
-        return (0x0, false);
+        return (address(0x0), false);
     }
 
     function parseString(bytes memory str, uint idx, uint len) internal pure returns (address, bool) {
         // TODO: More robust parsing that handles whitespace and multiple key/value pairs
-        if (str.readUint32(idx) != 0x613d3078) return (0x0, false); // 0x613d3078 == 'a=0x'
-        if (len < 44) return (0, false);
+        if (str.readUint32(idx) != 0x613d3078) return (address(0x0), false); // 0x613d3078 == 'a=0x'
+        if (len < 44) return (address(0x0), false);
         return hexToAddress(str, idx + 4);
     }
 
     function hexToAddress(bytes memory str, uint idx) internal pure returns (address, bool) {
-        if (str.length - idx < 40) return (0x0, false);
+        if (str.length - idx < 40) return (address(0x0), false);
         uint ret = 0;
         for (uint i = idx; i < idx + 40; i++) {
             ret <<= 4;
@@ -90,7 +90,7 @@ library DNSClaimChecker {
             } else if (x >= 97 && x < 103) {
                 ret |= x - 87;
             } else {
-                return (0, false);
+                return (address(0x0), false);
             }
         }
         return (address(ret), true);
