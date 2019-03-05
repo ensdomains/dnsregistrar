@@ -13,10 +13,10 @@ contract DNSRegistrar {
     DNSSEC public oracle;
     ENS public ens;
 
-    bytes4 constant INTERFACE_META_ID = bytes4(keccak256("supportsInterface(bytes4)"));
-    bytes4 constant DNSSEC_CLAIM_ID = bytes4(
-        keccak256("claim(bytes,bytes)") |
-        keccak256("proveAndClaim(bytes,bytes,bytes)") |
+    bytes4 constant private INTERFACE_META_ID = bytes4(keccak256("supportsInterface(bytes4)"));
+    bytes4 constant private DNSSEC_CLAIM_ID = bytes4(
+        keccak256("claim(bytes,bytes)") ^
+        keccak256("proveAndClaim(bytes,bytes,bytes)") ^
         keccak256("oracle()")
     );
 
