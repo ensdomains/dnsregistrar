@@ -13,6 +13,13 @@ contract DNSRegistrar {
     DNSSEC public oracle;
     ENS public ens;
 
+    bytes4 constant INTERFACE_META_ID = bytes4(keccak256("supportsInterface(bytes4)"));
+    bytes4 constant DNSSEC_CLAIM_ID = bytes4(
+        keccak256("claim(bytes,bytes)") |
+        keccak256("proveAndClaim(bytes,bytes,bytes)") |
+        keccak256("oracle()")
+    );
+
     event Claim(bytes32 indexed node, address indexed owner, bytes dnsname);
 
     constructor(DNSSEC _dnssec, ENS _ens) public {
@@ -36,7 +43,7 @@ contract DNSRegistrar {
         bytes32 labelHash;
         bytes32 rootNode;
         (labelHash, rootNode) = DNSClaimChecker.getLabels(name);
-        
+
         ens.setSubnodeOwner(rootNode, labelHash, addr);
         emit Claim(keccak256(abi.encodePacked(rootNode, labelHash)), addr, name);
     }
@@ -51,5 +58,10 @@ contract DNSRegistrar {
     function proveAndClaim(bytes memory name, bytes memory input, bytes memory proof) public {
         proof = oracle.submitRRSets(input, proof);
         claim(name, proof);
+    }
+
+    function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
+        return interfaceID == INTERFACE_META_ID ||
+               interfaceID == DNSSEC_CLAIM_ID;
     }
 }
