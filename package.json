@@ -1,7 +1,7 @@
 {
   "name": "@ensdomains/dnsregistrar",
   "main": "dist/dnsregistrar.js",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "requires": true,
   "lockfileVersion": 1,
   "prettier": {
@@ -48,6 +48,6 @@
     "prettier": "^1.13.7",
     "sinon": "^6.0.0",
     "solium": "^1.1.8",
-    "truffle": "^5.0.0"
+    "truffle": "^5.0.5"
   }
 }
