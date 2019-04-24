@@ -15,7 +15,7 @@
     "dns-packet": "^5.0.4",
     "eth-ens-namehash": "^2.0.8",
     "js-sha3": "^0.5.7",
-    "web3": "^1.0.0-beta.52"
+    "web3": "^1.0.0-beta.34"
   },
   "scripts": {
     "lint": "solium --dir ./contracts",
