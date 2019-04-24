@@ -1,7 +1,7 @@
 {
   "name": "@ensdomains/dnsregistrar",
   "main": "dist/dnsregistrar.js",
-  "version": "0.3.1",
+  "version": "0.3.4",
   "requires": true,
   "lockfileVersion": 1,
   "prettier": {
@@ -9,13 +9,13 @@
   },
   "dependencies": {
     "@ensdomains/buffer": "0.0.6",
-    "@ensdomains/dnsprovejs": "0.1.0",
+    "@ensdomains/dnsprovejs": "0.1.1",
     "@ensdomains/dnssec-oracle": "0.1.0",
     "@ensdomains/ens": "^0.3.0",
     "dns-packet": "^5.0.4",
     "eth-ens-namehash": "^2.0.8",
     "js-sha3": "^0.5.7",
-    "web3": "^1.0.0-beta.34"
+    "web3": "1.0.0-beta.34"
   },
   "scripts": {
     "lint": "solium --dir ./contracts",
