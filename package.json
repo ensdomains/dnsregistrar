@@ -1,7 +1,7 @@
 {
   "name": "@ensdomains/dnsregistrar",
   "main": "dist/dnsregistrar.js",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "requires": true,
   "lockfileVersion": 1,
   "prettier": {
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@ensdomains/buffer": "0.0.6",
-    "@ensdomains/dnsprovejs": "^0.1.2",
+    "@ensdomains/dnsprovejs": "^0.1.5",
     "@ensdomains/dnssec-oracle": "0.1.0",
     "@ensdomains/ens": "^0.3.0",
     "dns-packet": "^5.0.4",
