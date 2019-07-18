@@ -6,7 +6,6 @@ This project implements a registrar for ENS that grants ENS domains to anyone wh
 
 For details on how to use this, see [How to claim your DNS domain in ENS](https://medium.com/the-ethereum-name-service/how-to-claim-your-dns-domain-on-ens-e600ef2d92ca).
 
-
 ## Installing
 
 ```
@@ -26,9 +25,9 @@ In addition to `DNSRegistrar` Truffle based artifact which you can call the smar
 ```js
 var DNSRegistrarJs = require('@ensdomains/dnsregistrar');
 dnsregistrar = new DNSRegistrarJs(provider, dnsregistraraddress);
-dnsregistrar.claim('foo.test').then((claim)=>{
-    claim.submit({from:account});
-})
+dnsregistrar.claim('foo.test').then(claim => {
+  claim.submit({ from: account });
+});
 ```
 
 For more detail, please [read the doc](https://dnsregistrar.readthedocs.io/en/latest/)
@@ -48,4 +47,3 @@ npm install
 ```
 npm run test
 ```
-
