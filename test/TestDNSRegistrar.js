@@ -1,9 +1,11 @@
+const assert = require('assert');
 const ENSRegistry = artifacts.require('./ENSRegistry.sol');
 const DummyDNSSEC = artifacts.require('./DummyDNSSEC.sol');
 const DNSRegistrarContract = artifacts.require('./DNSRegistrar.sol');
 const namehash = require('eth-ens-namehash');
 const sha3 = require('js-sha3').keccak_256;
 const utils = require('./Helpers/Utils');
+const wireFormat = require('dns-packet');
 
 contract('DNSRegistrar', function(accounts) {
   var registrar = null;
@@ -11,6 +13,7 @@ contract('DNSRegistrar', function(accounts) {
   var dnssec = null;
   var tld = 'test';
   var now = Math.round(new Date().getTime() / 1000);
+  const validityPeriod = 2419200;
 
   beforeEach(async function() {
     ens = await ENSRegistry.new();
@@ -35,9 +38,9 @@ contract('DNSRegistrar', function(accounts) {
     await dnssec.setData(
       16,
       utils.hexEncodeName('_ens.foo.test'),
-      now,
-      now,
-      proof
+      proof,
+      now + validityPeriod,
+      now
     );
 
     await registrar.claim(utils.hexEncodeName('foo.test'), proof);
@@ -49,9 +52,9 @@ contract('DNSRegistrar', function(accounts) {
     await dnssec.setData(
       16,
       utils.hexEncodeName('_ens.foo.test'),
-      now,
-      now,
-      '0x'
+      '0x',
+      now + validityPeriod,
+      now
     );
 
     await registrar.claim(utils.hexEncodeName('foo.test'), '0x');
@@ -71,9 +74,9 @@ contract('DNSRegistrar', function(accounts) {
     await dnssec.setData(
       16,
       utils.hexEncodeName('_ens.foo.test'),
-      now,
-      now,
-      proof
+      proof,
+      now + validityPeriod,
+      now
     );
 
     await registrar.claim(utils.hexEncodeName('foo.test'), proof);
@@ -89,12 +92,37 @@ contract('DNSRegistrar', function(accounts) {
       data: ['a=' + accounts[0]]
     });
 
-    await dnssec.setData(16, utils.hexEncodeName('_ens.foo.test'), 0, 0, proof);
+    await dnssec.setData(
+      16,
+      utils.hexEncodeName('_ens.foo.test'),
+      proof,
+      now + validityPeriod,
+      0
+    );
 
     try {
       await registrar.claim(utils.hexEncodeName('bar.test'), proof);
     } catch (error) {
       return utils.ensureException(error);
     }
+  });
+
+  it('rejects expired proofs', async () => {
+    const proof = wireFormat.answer.encode({
+      name: '_ens.bar.test',
+      type: 'TXT',
+      data: 'a=0xC5D2460186F7233C927e7db2dcC703C0E500b653'
+    });
+    await dnssec.setData(
+      16,
+      wireFormat.name.encode('_ens.bar.test'),
+      proof,
+      now - 1,
+      now - 1 - validityPeriod
+    );
+    await assert.rejects(
+      () => registrar.claim(wireFormat.name.encode('bar.test'), proof),
+      'VM Exception while processing transaction: revert'
+    );
   });
 });
