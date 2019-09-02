@@ -1,7 +1,7 @@
 {
   "name": "@ensdomains/dnsregistrar",
   "main": "dist/dnsregistrar.js",
-  "version": "0.3.6",
+  "version": "0.3.9",
   "requires": true,
   "lockfileVersion": 1,
   "prettier": {
