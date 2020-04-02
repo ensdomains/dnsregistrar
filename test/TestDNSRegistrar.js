@@ -4,6 +4,7 @@ const DNSRegistrarContract = artifacts.require('./DNSRegistrar.sol');
 const namehash = require('eth-ens-namehash');
 const sha3 = require('js-sha3').keccak_256;
 const utils = require('./Helpers/Utils');
+const { exceptions } = require('@ensdomains/test-utils');
 
 contract('DNSRegistrar', function(accounts) {
   var registrar = null;
@@ -91,10 +92,6 @@ contract('DNSRegistrar', function(accounts) {
 
     await dnssec.setData(16, utils.hexEncodeName('_ens.foo.test'), 0, 0, proof);
 
-    try {
-      await registrar.claim(utils.hexEncodeName('bar.test'), proof);
-    } catch (error) {
-      return utils.ensureException(error);
-    }
+    exceptions.expectFailure(registrar.claim(utils.hexEncodeName('bar.test'), proof));
   });
 });
