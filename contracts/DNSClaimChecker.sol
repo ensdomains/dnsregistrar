@@ -14,13 +14,10 @@ library DNSClaimChecker {
     uint16 constant CLASS_INET = 1;
     uint16 constant TYPE_TXT = 16;
 
-    function getLabels(bytes memory name) internal view returns (bytes32, bytes32) {
+    function getLabels(bytes memory name) internal pure returns (bytes32 label, bytes32 parent) {
         uint len = name.readUint8(0);
-        uint second = name.readUint8(len + 1);
-
-        require(name.readUint8(len + second + 2) == 0);
-
-        return (name.keccak(1, len), keccak256(abi.encodePacked(bytes32(0), name.keccak(2 + len, second))));
+        label = name.keccak(1, len);
+        parent = dnsNamehash(name, len + 1);
     }
 
     function getOwnerAddress(DNSSEC oracle, bytes memory name, bytes memory proof)
@@ -96,4 +93,13 @@ library DNSClaimChecker {
         return (address(ret), true);
     }
 
+    function dnsNamehash(bytes memory name, uint offset) internal pure returns (bytes32) {
+        uint len = name.readUint8(offset);
+        if(len == 0) {
+            return bytes32(0);
+        }
+        bytes32 parent = dnsNamehash(name, offset + len + 1);
+        bytes32 label = name.keccak(offset + 1, len);
+        return keccak256(abi.encodePacked(parent, label));
+    }
 }

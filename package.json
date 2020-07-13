@@ -12,6 +12,7 @@
     "@ensdomains/dnsprovejs": "^0.1.8",
     "@ensdomains/dnssec-oracle": "0.1.0",
     "@ensdomains/ens": "^0.3.0",
+    "@ensdomains/root": "0.0.3",
     "@ensdomains/test-utils": "^1.3.0",
     "dns-packet": "^5.0.4",
     "eth-ens-namehash": "^2.0.8",

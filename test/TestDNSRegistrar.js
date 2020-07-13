@@ -1,5 +1,7 @@
 const ENSRegistry = artifacts.require('./ENSRegistry.sol');
 const DummyDNSSEC = artifacts.require('./DummyDNSSEC.sol');
+const Root = artifacts.require("@ensdomains/root/contracts/Root.sol");
+const SimplePublixSuffixList = artifacts.require('./SimplePublicSuffixList.sol');
 const DNSRegistrarContract = artifacts.require('./DNSRegistrar.sol');
 const namehash = require('eth-ens-namehash');
 const sha3 = require('js-sha3').keccak_256;
@@ -9,16 +11,30 @@ const { exceptions } = require('@ensdomains/test-utils');
 contract('DNSRegistrar', function(accounts) {
   var registrar = null;
   var ens = null;
+  var root = null;
   var dnssec = null;
-  var tld = 'test';
+  var suffixes = null;
   var now = Math.round(new Date().getTime() / 1000);
 
   beforeEach(async function() {
     ens = await ENSRegistry.new();
-    dnssec = await DummyDNSSEC.new();
-    registrar = await DNSRegistrarContract.new(dnssec.address, ens.address);
 
-    await ens.setSubnodeOwner('0x0', '0x' + sha3(tld), registrar.address);
+    root = await Root.new(ens.address);
+    await ens.setOwner('0x0', root.address);
+
+    dnssec = await DummyDNSSEC.new();
+    
+    suffixes = await SimplePublixSuffixList.new();
+    await suffixes.addPublicSuffixes([utils.hexEncodeName("test"), utils.hexEncodeName("co.nz")]);
+
+    registrar = await DNSRegistrarContract.new(dnssec.address, suffixes.address, ens.address);
+    await root.setController(registrar.address, true);
+    await registrar.enableSuffix(utils.hexEncodeName("test"));
+  });
+
+  it('allows anyone to enable a valid suffix', async function() {
+    await registrar.enableSuffix(utils.hexEncodeName("co.nz"), {from: accounts[1]});
+    assert.equal(await ens.owner(namehash.hash("co.nz")), registrar.address);
   });
 
   it('allows the owner of a DNS name to claim it in ENS', async function() {
