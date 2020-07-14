@@ -29,12 +29,6 @@ contract('DNSRegistrar', function(accounts) {
 
     registrar = await DNSRegistrarContract.new(dnssec.address, suffixes.address, ens.address);
     await root.setController(registrar.address, true);
-    await registrar.enableSuffix(utils.hexEncodeName("test"));
-  });
-
-  it('allows anyone to enable a valid suffix', async function() {
-    await registrar.enableSuffix(utils.hexEncodeName("co.nz"), {from: accounts[1]});
-    assert.equal(await ens.owner(namehash.hash("co.nz")), registrar.address);
   });
 
   it('allows the owner of a DNS name to claim it in ENS', async function() {
@@ -60,6 +54,28 @@ contract('DNSRegistrar', function(accounts) {
     await registrar.claim(utils.hexEncodeName('foo.test'), proof);
 
     assert.equal(await ens.owner(namehash.hash('foo.test')), accounts[0]);
+  });
+
+  it('allows claims on names that are not TLDs', async function() {
+    var proof = utils.hexEncodeTXT({
+      name: '_ens.foo.co.nz',
+      type: 'TXT',
+      class: 'IN',
+      ttl: 3600,
+      data: ['a=' + accounts[0]]
+    });
+
+    await dnssec.setData(
+      16,
+      utils.hexEncodeName('_ens.foo.co.nz'),
+      now,
+      now,
+      proof
+    );
+
+    await registrar.claim(utils.hexEncodeName('foo.co.nz'), proof);
+
+    assert.equal(await ens.owner(namehash.hash('foo.co.nz')), accounts[0]);
   });
 
   it('allows anyone to zero out an obsolete name', async function() {

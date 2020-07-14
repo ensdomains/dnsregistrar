@@ -28,7 +28,6 @@ contract DNSRegistrar {
     event Claim(bytes32 indexed node, address indexed owner, bytes dnsname);
     event NewOracle(address oracle);
     event NewPublicSuffixList(address suffixes);
-    event NewSuffix(bytes suffix);
 
     constructor(DNSSEC _dnssec, PublicSuffixList _suffixes, ENS _ens) public {
         oracle = _dnssec;
@@ -68,16 +67,19 @@ contract DNSRegistrar {
      *        record.
      */
     function claim(bytes memory name, bytes memory proof) public {
-        // Parent name must be in the public suffix list.
+        // Get the first label
         uint labelLen = name.readUint8(0);
-        require(suffixes.isPublicSuffix(name.substring(labelLen + 1, name.length - labelLen - 1)), "Parent name must be a public suffix");
+        bytes32 labelHash = name.keccak(1, labelLen);
+
+        // Parent name must be in the public suffix list.
+        bytes memory parentName = name.substring(labelLen + 1, name.length - labelLen - 1);
+        require(suffixes.isPublicSuffix(parentName), "Parent name must be a public suffix");
+
+        // Make sure the parent name is enabled
+        bytes32 rootNode = enableNode(parentName, 0);
 
         address addr;
         (addr,) = DNSClaimChecker.getOwnerAddress(oracle, name, proof);
-
-        bytes32 labelHash;
-        bytes32 rootNode;
-        (labelHash, rootNode) = DNSClaimChecker.getLabels(name);
 
         ens.setSubnodeOwner(rootNode, labelHash, addr);
         emit Claim(keccak256(abi.encodePacked(rootNode, labelHash)), addr, name);
@@ -95,29 +97,22 @@ contract DNSRegistrar {
         claim(name, proof);
     }
 
-    function enableSuffix(bytes memory domain) public {
-        require(suffixes.isPublicSuffix(domain), "Domain must be a public suffix");
-        (, bool enabled) = claimNode(domain, 0);
-        require(enabled, "Domain must not already be enabled");
-        emit NewSuffix(domain);
-    }
-
     function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
         return interfaceID == INTERFACE_META_ID ||
                interfaceID == DNSSEC_CLAIM_ID;
     }
 
-    function claimNode(bytes memory domain, uint offset) internal returns(bytes32 node, bool enabled) {
+    function enableNode(bytes memory domain, uint offset) internal returns(bytes32 node) {
         uint len = domain.readUint8(offset);
         if(len == 0) {
-            return (bytes32(0), false);
+            return bytes32(0);
         }
 
-        (bytes32 parentNode,) = claimNode(domain, offset + len + 1);
+        bytes32 parentNode = enableNode(domain, offset + len + 1);
         bytes32 label = domain.keccak(offset + 1, len);
         node = keccak256(abi.encodePacked(parentNode, label));
         address owner = ens.owner(node);
-        require(owner == address(0) || owner == address(this), "Cannot claim a name owned by someone else");
+        require(owner == address(0) || owner == address(this), "Cannot enable a name owned by someone else");
         if(owner != address(this)) {
             if(parentNode == bytes32(0)) {
                 Root root = Root(ens.owner(bytes32(0)));
@@ -125,8 +120,7 @@ contract DNSRegistrar {
             } else {
                 ens.setSubnodeOwner(parentNode, label, address(this));
             }
-            return (node, true);
         }
-        return (node, false);
+        return node;
     }
 }
