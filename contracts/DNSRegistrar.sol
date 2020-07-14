@@ -70,7 +70,10 @@ contract DNSRegistrar {
     function claim(bytes memory name, bytes memory proof) public {
         // Parent name must be in the public suffix list.
         uint labelLen = name.readUint8(0);
-        require(suffixes.isPublicSuffix(name.substring(labelLen + 1, name.length - labelLen - 1)), "Parent name must be a public suffix");
+        require(
+            suffixes.isPublicSuffix(name.substring(labelLen + 1, name.length - labelLen - 1)), 
+            "Parent name must be a public suffix"
+         );
 
         address addr;
         (addr,) = DNSClaimChecker.getOwnerAddress(oracle, name, proof);
