@@ -14,15 +14,6 @@ library DNSClaimChecker {
     uint16 constant CLASS_INET = 1;
     uint16 constant TYPE_TXT = 16;
 
-    function getLabels(bytes memory name) internal view returns (bytes32, bytes32) {
-        uint len = name.readUint8(0);
-        uint second = name.readUint8(len + 1);
-
-        require(name.readUint8(len + second + 2) == 0);
-
-        return (name.keccak(1, len), keccak256(abi.encodePacked(bytes32(0), name.keccak(2 + len, second))));
-    }
-
     function getOwnerAddress(DNSSEC oracle, bytes memory name, bytes memory proof)
         internal
         view
@@ -95,5 +86,4 @@ library DNSClaimChecker {
         }
         return (address(ret), true);
     }
-
 }
