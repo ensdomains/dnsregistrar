@@ -97,6 +97,18 @@ contract DNSRegistrar {
         claim(name, proof);
     }
 
+    /**
+     * @dev Submits proofs to the DNSSEC oracle to delete an entry, then claims a name using those proofs.
+     * @param name The name to claim, in DNS wire format.
+     * @param nsec The next rrset to prove the name does not exist
+     * @param sig  The rrsig of the rrest
+     * @param proof The proof record for the first element in input.
+     */
+    function disproveAndClaim(uint16 deleteType, bytes memory name, bytes memory nsec, bytes memory sig, bytes memory proof) public {
+        oracle.deleteRRSet(deleteType, name, nsec, sig, proof);
+        claim(name, '0x');
+    }
+
     function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
         return interfaceID == INTERFACE_META_ID ||
                interfaceID == DNSSEC_CLAIM_ID;
