@@ -124,6 +124,6 @@ contract('DNSRegistrar', function(accounts) {
 
     await dnssec.setData(16, utils.hexEncodeName('_ens.foo.test'), 0, 0, proof);
 
-    exceptions.expectFailure(registrar.claim(utils.hexEncodeName('bar.test'), proof));
+    await exceptions.expectFailure(registrar.claim(utils.hexEncodeName('bar.test'), proof));
   });
 });

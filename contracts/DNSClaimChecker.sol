@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 
 import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
 import "@ensdomains/dnssec-oracle/contracts/BytesUtils.sol";
@@ -33,7 +33,7 @@ library DNSClaimChecker {
         require(hash == bytes20(keccak256(proof)));
 
         for (RRUtils.RRIterator memory iter = proof.iterateRRs(0); !iter.done(); iter.next()) {
-            require(inserted + iter.ttl >= now, "DNS record is stale; refresh or delete it before proceeding.");
+            require(inserted + iter.ttl >= block.timestamp, "DNS record is stale; refresh or delete it before proceeding.");
 
             bool found;
             address addr;

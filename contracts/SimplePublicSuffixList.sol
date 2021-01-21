@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "@ensdomains/root/contracts/Ownable.sol";
@@ -13,7 +13,7 @@ contract SimplePublicSuffixList is PublicSuffixList, Ownable {
         }
     }
 
-    function isPublicSuffix(bytes calldata name) external view returns(bool) {
+    function isPublicSuffix(bytes calldata name) external override view returns(bool) {
         return suffixes[name];
     }
 }
