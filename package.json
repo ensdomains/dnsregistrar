@@ -35,6 +35,7 @@
     "prettier": "^1.13.7",
     "sinon": "^6.0.0",
     "solium": "^1.2.4",
-    "truffle": "^5.1.53"
+    "truffle": "^5.1.53",
+    "truffle-plugin-verify": "^0.5.4"
   }
 }
