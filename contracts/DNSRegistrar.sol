@@ -1,4 +1,5 @@
 pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
 import "@ensdomains/dnssec-oracle/contracts/BytesUtils.sol";
 import "@ensdomains/dnssec-oracle/contracts/DNSSEC.sol";
@@ -29,7 +30,7 @@ contract DNSRegistrar {
     event NewOracle(address oracle);
     event NewPublicSuffixList(address suffixes);
 
-    constructor(DNSSEC _dnssec, PublicSuffixList _suffixes, ENS _ens) public {
+    constructor(DNSSEC _dnssec, PublicSuffixList _suffixes, ENS _ens) {
         oracle = _dnssec;
         emit NewOracle(address(oracle));
         suffixes = _suffixes;
@@ -92,7 +93,7 @@ contract DNSRegistrar {
      *        proof must be the TXT record required by the registrar.
      * @param proof The proof record for the first element in input.
      */
-    function proveAndClaim(bytes memory name, bytes memory input, bytes memory proof) public {
+    function proveAndClaim(bytes memory name, DNSSEC.RRSetWithSignature[] memory input, bytes memory proof) public {
         proof = oracle.submitRRSets(input, proof);
         claim(name, proof);
     }

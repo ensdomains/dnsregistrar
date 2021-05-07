@@ -51,7 +51,7 @@ contract('DNSRegistrar', function(accounts) {
       proof
     );
 
-    await registrar.claim(utils.hexEncodeName('foo.test'), proof);
+    await registrar.proveAndClaim(utils.hexEncodeName('foo.test'), [], proof);
 
     assert.equal(await ens.owner(namehash.hash('foo.test')), accounts[0]);
   });
@@ -73,7 +73,7 @@ contract('DNSRegistrar', function(accounts) {
       proof
     );
 
-    await registrar.claim(utils.hexEncodeName('foo.co.nz'), proof);
+    await registrar.proveAndClaim(utils.hexEncodeName('foo.co.nz'), [], proof);
 
     assert.equal(await ens.owner(namehash.hash('foo.co.nz')), accounts[0]);
   });
@@ -87,7 +87,7 @@ contract('DNSRegistrar', function(accounts) {
       '0x'
     );
 
-    await registrar.claim(utils.hexEncodeName('foo.test'), '0x');
+    await registrar.proveAndClaim(utils.hexEncodeName('foo.test'), [], '0x');
 
     assert.equal(await ens.owner(namehash.hash('foo.test')), 0);
   });
@@ -109,7 +109,7 @@ contract('DNSRegistrar', function(accounts) {
       proof
     );
 
-    await registrar.claim(utils.hexEncodeName('foo.test'), proof);
+    await registrar.proveAndClaim(utils.hexEncodeName('foo.test'), [], proof);
     assert.equal(await ens.owner(namehash.hash('foo.test')), accounts[1]);
   });
 
@@ -124,6 +124,6 @@ contract('DNSRegistrar', function(accounts) {
 
     await dnssec.setData(16, utils.hexEncodeName('_ens.foo.test'), 0, 0, proof);
 
-    await exceptions.expectFailure(registrar.claim(utils.hexEncodeName('bar.test'), proof));
+    await exceptions.expectFailure(registrar.proveAndClaim(utils.hexEncodeName('bar.test'), [], proof));
   });
 });
